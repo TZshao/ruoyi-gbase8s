@@ -415,6 +415,7 @@ drop table if exists sys_oper_log;
 create table sys_oper_log (
                               oper_id           SERIAL8 not null   primary key ,
                               title             varchar(50)     default ''                 ,
+                              module             varchar(50)     default ''                 ,
                               business_type     INTEGER          default 0                  ,
                               method            varchar(200)    default ''                 ,
                               request_method    varchar(10)     default ''                 ,
@@ -428,8 +429,10 @@ create table sys_oper_log (
                               json_result       varchar(2000)   default ''                 ,
                               status            INTEGER          default 0                  ,
                               error_msg         varchar(2000)   default ''                 ,
-                              oper_time         DATETIME YEAR TO SECOND                                   ,
-                              cost_time         bigint      default 0
+                              oper_time         DATETIME YEAR TO SECOND                     ,
+                              cost_time         bigint      default 0                       ,
+                              beforeopt TEXT,
+                              afteropt TEXT
 ) ;
 
 
@@ -520,7 +523,7 @@ insert into sys_dict_data values(29, 2,  '失败',     '1',       'sys_common_st
 -- ----------------------------
 drop table if exists sys_config;
 create table sys_config (
-                            config_id         INTEGER          not null  primary key   ,
+                            config_id         SERIAL8          not null  primary key   ,
                             config_name       varchar(100)    default ''                 ,
                             config_key        varchar(100)    default ''                 ,
                             config_value      varchar(500)    default ''                 ,
@@ -547,7 +550,7 @@ insert into sys_config values(8, '用户管理-账号密码更新周期',     's
 -- ----------------------------
 drop table if exists sys_logininfor;
 create table sys_logininfor (
-                                info_id        bigint     not null  primary key  ,
+                                info_id        SERIAL8     not null  primary key  ,
                                 user_name      varchar(50)    default ''                ,
                                 ipaddr         varchar(128)   default ''                ,
                                 login_location varchar(255)   default ''                ,
@@ -564,7 +567,7 @@ create table sys_logininfor (
 -- ----------------------------
 drop table if exists sys_job;
 create table sys_job (
-                         job_id              bigint    not null primary key    ,
+                         job_id              SERIAL8    not null primary key    ,
                          job_name            varchar(64)   default ''                 ,
                          job_group           varchar(64)   default 'DEFAULT'          ,
                          invoke_target       varchar(500)  not null                   ,
@@ -581,8 +584,8 @@ create table sys_job (
 ) ;
 
 insert into sys_job values(1, '系统默认（无参）', 'DEFAULT', 'ryTask.ryNoParams',        '0/10 * * * * ?', '3', '1', '1', 'admin', now(), '', null, '');
-insert into sys_job values(2, '系统默认（有参）', 'DEFAULT', 'ryTask.ryParams(\'ry\')',  '0/15 * * * * ?', '3', '1', '1', 'admin', now(), '', null, '');
-insert into sys_job values(3, '系统默认（多参）', 'DEFAULT', 'ryTask.ryMultipleParams(\'ry\', true, 2000L, 316.50D, 100)',  '0/20 * * * * ?', '3', '1', '1', 'admin', now(), '', null, '');
+insert into sys_job values(2, '系统默认（有参）', 'DEFAULT', 'ryTask.ryParams(''ry'')',  '0/15 * * * * ?', '3', '1', '1', 'admin', now(), '', null, '');
+insert into sys_job values(3, '系统默认（多参）', 'DEFAULT', 'ryTask.ryMultipleParams(''ry'', true, 2000L, 316.50D, 100)',  '0/20 * * * * ?', '3', '1', '1', 'admin', now(), '', null, '');
 
 
 -- ----------------------------
@@ -590,7 +593,7 @@ insert into sys_job values(3, '系统默认（多参）', 'DEFAULT', 'ryTask.ryM
 -- ----------------------------
 drop table if exists sys_job_log;
 create table sys_job_log (
-                             job_log_id          bigint     not null   primary key  ,
+                             job_log_id          SERIAL8     not null   primary key  ,
                              job_name            varchar(64)    not null                   ,
                              job_group           varchar(64)    not null                   ,
                              invoke_target       varchar(500)   not null                   ,
@@ -606,7 +609,7 @@ create table sys_job_log (
 -- ----------------------------
 drop table if exists sys_notice;
 create table sys_notice (
-                            notice_id         INTEGER          not null   primary key  ,
+                            notice_id         SERIAL8          not null   primary key  ,
                             notice_title      varchar(50)     not null                   ,
                             notice_type       char(1)         not null                   ,
                             notice_content    blob        default null               ,

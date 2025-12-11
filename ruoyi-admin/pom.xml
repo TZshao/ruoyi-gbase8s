@@ -19,6 +19,7 @@
         <dependency>
             <groupId>com.gbasedbt</groupId>
             <artifactId>gbase8sJDBC</artifactId>
+            <version>8.8</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/gbasedbtjdbc_3.6.3_3X2_1_377ee9.jar</systemPath>
         </dependency>

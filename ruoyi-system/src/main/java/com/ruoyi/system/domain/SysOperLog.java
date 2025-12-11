@@ -1,6 +1,8 @@
 package com.ruoyi.system.domain;
 
 import java.util.Date;
+
+import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.annotation.Excel.ColumnType;
@@ -8,7 +10,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
  * 操作日志记录表 oper_log
- * 
+ *
  * @author ruoyi
  */
 public class SysOperLog extends BaseEntity
@@ -20,8 +22,11 @@ public class SysOperLog extends BaseEntity
     private Long operId;
 
     /** 操作模块 */
-    @Excel(name = "操作模块")
-    private String title;
+    @Excel(name = "操作名")
+    private String title; 
+    /** 操作模块 */
+    @Excel(name = "模块")
+    private String module; //读取类上的Tag
 
     /** 业务类型（0其它 1新增 2修改 3删除） */
     @Excel(name = "业务类型", readConverterExp = "0=其它,1=新增,2=修改,3=删除,4=授权,5=导出,6=导入,7=强退,8=生成代码,9=清空数据")
@@ -86,6 +91,35 @@ public class SysOperLog extends BaseEntity
     /** 消耗时间 */
     @Excel(name = "消耗时间", suffix = "毫秒")
     private Long costTime;
+
+    private String beforeOpt;
+    private String afterOpt;
+
+    
+
+    public String getModule() {
+        return module;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
+    }
+
+    public String getBeforeOpt() {
+        return beforeOpt;
+    }
+
+    public void setBeforeOpt(String beforeOpt) {
+        this.beforeOpt = beforeOpt;
+    }
+
+    public String getAfterOpt() {
+        return afterOpt;
+    }
+
+    public void setAfterOpt(String afterOpt) {
+        this.afterOpt = afterOpt;
+    }
 
     public Long getOperId()
     {
