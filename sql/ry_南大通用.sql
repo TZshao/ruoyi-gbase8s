@@ -18,7 +18,15 @@ create table sys_dept (
                           update_by         varchar(64)     default ''                 ,
                           update_time       DATETIME YEAR TO SECOND
 ) ;
-
+comment on column sys_dept.dept_id is '部门ID';
+comment on column sys_dept.parent_id is '父部门ID';
+comment on column sys_dept.ancestors is '祖级列表';
+comment on column sys_dept.dept_name is '部门名称';
+comment on column sys_dept.order_num is '显示顺序';
+comment on column sys_dept.leader is '负责人';
+comment on column sys_dept.phone is '联系电话';
+comment on column sys_dept.email is '邮箱';
+comment on column sys_dept.status is '部门状态:0正常,1停用';
 -- ----------------------------
 -- 初始化-部门表数据
 -- ----------------------------

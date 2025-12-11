@@ -9,9 +9,10 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
  * 
  * @author ruoyi
  */
-@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
-public class RuoYiApplication
-{
+@SpringBootApplication(
+        exclude = { DataSourceAutoConfiguration.class },
+        scanBasePackages = { "com.ruoyi", "com.hfits" })
+public class RuoYiApplication{
     public static void main(String[] args)
     {
         // System.setProperty("spring.devtools.restart.enabled", "false");
