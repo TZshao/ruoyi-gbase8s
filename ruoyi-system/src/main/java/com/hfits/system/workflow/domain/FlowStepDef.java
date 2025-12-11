@@ -18,13 +18,12 @@ public class FlowStepDef extends BaseEntity
 
     @NotNull(message = "flowId不能为空")
     private Long flowId;
+    private Integer flowVersion;
 
     @NotBlank(message = "步骤编码不能为空")
-    @Size(max = 64, message = "步骤编码不能超过64个字符")
     private String stepCode;
 
     @NotBlank(message = "步骤名称不能为空")
-    @Size(max = 128, message = "步骤名称不能超过128个字符")
     private String stepName;
 
     private String nextOnPass;

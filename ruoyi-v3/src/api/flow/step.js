@@ -43,3 +43,11 @@ export function delFlowStep(ids) {
   })
 }
 
+// 触发事件下拉
+export function listStepTriggers() {
+  return request({
+    url: '/flow/step/triggers',
+    method: 'get'
+  })
+}
+

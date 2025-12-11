@@ -2,10 +2,13 @@ package com.hfits.system.workflow.service;
 
 import com.ruoyi.common.utils.DateUtils;
 import com.hfits.system.workflow.domain.FlowDef;
+import com.hfits.system.workflow.domain.FlowStepDef;
 import com.ruoyi.system.mapper.FlowDefMapper;
+import com.ruoyi.system.mapper.FlowStepDefMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,6 +19,9 @@ import java.util.List;
 public class FlowDefService {
     @Autowired
     private FlowDefMapper flowDefMapper;
+
+    @Autowired
+    private FlowStepDefMapper flowStepDefMapper;
 
 
     public FlowDef selectFlowDefById(Long id) {
@@ -28,6 +34,7 @@ public class FlowDefService {
     }
 
 
+    @Transactional(rollbackFor = Exception.class)
     public int insertFlowDef(FlowDef flowDef) {
         if (StringUtils.isBlank(flowDef.getFlowCode())) {
             flowDef.setFlowCode(generateFlowCode());
@@ -36,7 +43,18 @@ public class FlowDefService {
             flowDef.setVersion(1);
         }
         flowDef.setCreateTime(DateUtils.getNowDate());
-        return flowDefMapper.insertFlowDef(flowDef);
+        int rows = flowDefMapper.insertFlowDef(flowDef);
+
+        // 默认生成发起步骤，保证流程可用
+        FlowStepDef startStep = new FlowStepDef();
+        startStep.setFlowId(flowDef.getId());
+        startStep.setStepCode("RISE");
+        startStep.setStepName("发起申请");
+        startStep.setOrderNum(1);
+        startStep.setCreateBy(flowDef.getCreateBy());
+        startStep.setCreateTime(DateUtils.getNowDate());
+        flowStepDefMapper.insertFlowStepDef(startStep);
+        return rows;
     }
 
 

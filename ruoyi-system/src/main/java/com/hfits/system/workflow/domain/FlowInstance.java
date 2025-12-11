@@ -16,11 +16,12 @@ public class FlowInstance extends BaseEntity
 
     @NotNull(message = "流程ID不能为空")
     private Long flowId;
+    private Integer flowVersion;
 
     /** 申请人用户ID */
     private Long applicantId;
 
-    /** 状态 RUNNING/PASS/REJECT/CANCEL */
+    /** 状态 PENDING/RUNNING/CLOSED */
     private String status;
 
     /** 当前步骤编码 */
@@ -32,6 +33,14 @@ public class FlowInstance extends BaseEntity
     // 关联展示字段
     private String flowCode;
     private String flowName;
+
+    public Integer getFlowVersion() {
+        return flowVersion;
+    }
+
+    public void setFlowVersion(Integer flowVersion) {
+        this.flowVersion = flowVersion;
+    }
 
     public Long getId()
     {

@@ -124,33 +124,59 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="通过后跳转" prop="nextOnPass">
-              <el-input v-model="stepForm.nextOnPass" placeholder="FINISH/START/其他步骤编码" />
+            <el-form-item label="通过后步骤" prop="nextOnPass">
+              <el-select v-model="stepForm.nextOnPass" placeholder="请选择" filterable style="width: 100%">
+                <el-option v-for="item in stepOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="拒绝后跳转" prop="nextOnReject">
-              <el-input v-model="stepForm.nextOnReject" placeholder="START 或 下一步骤编码" />
+            <el-form-item label="拒绝后步骤" prop="nextOnReject">
+              <el-select v-model="stepForm.nextOnReject" placeholder="请选择" filterable style="width: 100%">
+                <el-option v-for="item in stepOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="审批人类型" prop="handlerType">
-              <el-input v-model="stepForm.handlerType" placeholder="角色/用户/部门等" />
+            <el-form-item label="审批类型" prop="handlerType">
+              <el-input v-model="stepForm.handlerType" placeholder="等权限控制完善后实现" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="审批人取值" prop="handlerValue">
-              <el-input v-model="stepForm.handlerValue" placeholder="ROLE_ADMIN / 1001 等" />
+            <el-form-item label="审批人" prop="handlerValue">
+              <el-input v-model="stepForm.handlerValue" placeholder="等权限控制完善后实现" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="通过事件" prop="eventOnPass">
-              <el-input v-model="stepForm.eventOnPass" placeholder="可选" />
+            <el-form-item label="通过时触发" prop="eventOnPass">
+              <el-row :gutter="10">
+                <el-col :span="11">
+                  <el-select v-model="eventPass.cls" placeholder="类 + 方法" filterable clearable style="width: 100%">
+                    <el-option v-for="item in triggerClassOptions" :key="item.value" :label="item.label" :value="item.value" />
+                  </el-select>
+                </el-col>
+                <el-col :span="13">
+                  <el-select v-model="eventPass.method" placeholder="默认静默流转到下一步" filterable clearable style="width: 100%">
+                    <el-option v-for="item in triggerMethodOptions(eventPass.cls)" :key="item.value" :label="item.label" :value="item.value" />
+                  </el-select>
+                </el-col>
+              </el-row>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="拒绝事件" prop="eventOnReject">
-              <el-input v-model="stepForm.eventOnReject" placeholder="可选" />
+            <el-form-item label="拒绝时触发" prop="eventOnReject">
+              <el-row :gutter="10">
+                <el-col :span="11">
+                  <el-select v-model="eventReject.cls" placeholder="类 + 方法" filterable clearable style="width: 100%">
+                    <el-option v-for="item in triggerClassOptions" :key="item.value" :label="item.label" :value="item.value" />
+                  </el-select>
+                </el-col>
+                <el-col :span="13">
+                  <el-select v-model="eventReject.method" placeholder="默认静默流转到下一步" filterable clearable style="width: 100%">
+                    <el-option v-for="item in triggerMethodOptions(eventReject.cls)" :key="item.value" :label="item.label" :value="item.value" />
+                  </el-select>
+                </el-col>
+              </el-row>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -279,7 +305,7 @@
 
 <script setup name="FlowDefinition">
 import { listFlowDef, getFlowDef, addFlowDef, updateFlowDef, delFlowDef } from "@/api/flow/definition"
-import { listFlowStep, getFlowStep, addFlowStep, updateFlowStep, delFlowStep } from "@/api/flow/step"
+import { listFlowStep, getFlowStep, addFlowStep, updateFlowStep, delFlowStep, listStepTriggers } from "@/api/flow/step"
 import { listInstance } from "@/api/flow/instance"
 import { useRouter } from "vue-router"
 
@@ -320,6 +346,24 @@ const stepRules = {
   stepCode: [{ required: true, message: "步骤编码不能为空", trigger: "blur" }],
   stepName: [{ required: true, message: "步骤名称不能为空", trigger: "blur" }]
 }
+const triggerOptions = ref([])
+const triggerClassOptions = computed(() =>
+  (triggerOptions.value || []).map(item => ({ label: item.className, value: item.className }))
+)
+const triggerMethodOptions = (cls) => {
+  const target = (triggerOptions.value || []).find(item => item.className === cls)
+  return target ? target.methods.map(m => ({ label: m, value: m })) : []
+}
+
+const eventPass = reactive({ cls: "", method: "" })
+const eventReject = reactive({ cls: "", method: "" })
+const stepOptions = computed(() => {
+  const opts = (stepList.value || []).map(item => ({
+    label: `${item.stepCode} ${item.stepName || ""}`.trim(),
+    value: item.stepCode
+  }))
+  return [{ label: "结束(close)", value: "close" }, ...opts]
+})
 
 // 配置表单结构相关
 const formSchemaDialogOpen = ref(false)
@@ -478,6 +522,7 @@ function openConfigStep(row) {
   currentFlowId.value = row.id
   stepDialogOpen.value = true
   getStepList()
+  loadTriggerOptions()
 }
 
 function getStepList() {
@@ -485,6 +530,16 @@ function getStepList() {
   listFlowStep({ flowId: currentFlowId.value, pageNum: 1, pageSize: 100 }).then(res => {
     stepList.value = res.rows || []
     stepLoading.value = false
+  })
+}
+
+function loadTriggerOptions() {
+  listStepTriggers().then(res => {
+    const raw = res.data || {}
+    triggerOptions.value = Object.keys(raw).map(cls => ({
+      className: cls,
+      methods: raw[cls] || []
+    }))
   })
 }
 
@@ -499,20 +554,41 @@ function handleAddStep() {
   stepForm.handlerValue = ""
   stepForm.eventOnPass = ""
   stepForm.eventOnReject = ""
-  stepForm.orderNum = 0
+  eventPass.cls = ""
+  eventPass.method = ""
+  eventReject.cls = ""
+  eventReject.method = ""
+  stepForm.orderNum = computeNextOrder()
   stepTitle.value = "新增步骤"
   stepFormOpen.value = true
+}
+
+function computeNextOrder() {
+  if (!Array.isArray(stepList.value) || stepList.value.length === 0) {
+    return 1
+  }
+  const maxOrder = Math.max(...stepList.value.map(item => Number(item.orderNum || 0)))
+  return Number.isFinite(maxOrder) ? maxOrder + 1 : 1
 }
 
 function handleEditStep(row) {
   getFlowStep(row.id).then(res => {
     Object.assign(stepForm, res.data)
+    const [pCls, pMethod] = (stepForm.eventOnPass || "").split(".")
+    const [rCls, rMethod] = (stepForm.eventOnReject || "").split(".")
+    eventPass.cls = pCls || ""
+    eventPass.method = pMethod || ""
+    eventReject.cls = rCls || ""
+    eventReject.method = rMethod || ""
     stepTitle.value = "修改步骤"
     stepFormOpen.value = true
   })
 }
 
 function submitStepForm() {
+  // 组合事件
+  stepForm.eventOnPass = eventPass.cls && eventPass.method ? `${eventPass.cls}.${eventPass.method}` : ""
+  stepForm.eventOnReject = eventReject.cls && eventReject.method ? `${eventReject.cls}.${eventReject.method}` : ""
   proxy.$refs["stepFormRef"].validate(valid => {
     if (!valid) return
     if (stepForm.id) {

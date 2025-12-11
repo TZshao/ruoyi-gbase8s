@@ -22,7 +22,7 @@ public class FlowAction extends BaseEntity
     /** 动作发生的步骤 */
     private String stepCode;
 
-    /** PASS / REJECT / CANCEL */
+    /** PASS / REJECT  */
     private String action;
 
     /** 审批意见 */

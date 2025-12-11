@@ -25,6 +25,13 @@ public class FlowStepController extends BaseController
     private FlowStepDefService flowStepDefService;
 
     @PreAuthorize("@ss.hasPermi('flow:step:list')")
+    @GetMapping("/triggers")
+    public AjaxResult triggerOptions()
+    {
+        return success(flowStepDefService.listAvailableEvents());
+    }
+
+    @PreAuthorize("@ss.hasPermi('flow:step:list')")
     @GetMapping("/list")
     public TableDataInfo list(FlowStepDef flowStepDef)
     {

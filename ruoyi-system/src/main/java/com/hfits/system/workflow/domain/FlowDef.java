@@ -28,6 +28,16 @@ public class FlowDef extends BaseEntity
     /** 版本号 */
     private Integer version;
 
+    private Integer publishStat;
+
+    public Integer getPublishStat() {
+        return publishStat;
+    }
+
+    public void setPublishStat(Integer publishStat) {
+        this.publishStat = publishStat;
+    }
+
     public Long getId()
     {
         return id;

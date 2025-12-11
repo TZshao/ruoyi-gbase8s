@@ -5,9 +5,8 @@ package com.hfits.system.workflow.domain;
  */
 public enum FlowStatus
 {
+    PENDING,
     RUNNING,
-    PASS,
-    REJECT,
-    CANCEL
+    CLOSED
 }
 

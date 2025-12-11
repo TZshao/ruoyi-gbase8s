@@ -1,14 +1,24 @@
 # 数据源配置
+#spring:
+#    datasource:
+#        type: com.alibaba.druid.pool.DruidDataSource
+#        driverClassName: com.gbasedbt.jdbc.Driver
+#        druid:
+#            # 主库数据源
+#            master:
+#                url: jdbc:gbasedbt-sqli://${GBASE_IP:192.168.31.254}:${GBASE_PORT:9088}/test:GBASEDBTSERVER=gbase01;DB_LOCALE=zh_CN.utf8;CLIENT_LOCALE=zh_CN.utf8;IFX_LOCK_MODE_WAIT=30;
+#                username: gbasedbt
+#                password: GBase@123
 spring:
     datasource:
         type: com.alibaba.druid.pool.DruidDataSource
-        driverClassName: com.gbasedbt.jdbc.Driver
+        driverClassName: com.mysql.cj.jdbc.Driver
         druid:
             # 主库数据源
             master:
-                url: jdbc:gbasedbt-sqli://${GBASE_IP:192.168.31.254}:${GBASE_PORT:9088}/test:GBASEDBTSERVER=gbase01;DB_LOCALE=zh_CN.utf8;CLIENT_LOCALE=zh_CN.utf8;IFX_LOCK_MODE_WAIT=30;
-                username: gbasedbt
-                password: GBase@123
+                url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                username: root
+                password: root
             # 从库数据源
             slave:
                 # 从数据源开关/默认关闭

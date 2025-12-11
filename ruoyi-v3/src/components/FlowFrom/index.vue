@@ -32,7 +32,7 @@
           
           <!-- 数字输入框 -->
           <el-input-number
-            v-else-if="field.type === 'number'"
+            v-else-if="field.type === 'number' && !field.readonly"
             v-model="formData[field.name]"
             :placeholder="'请输入' + field.label"
             :disabled="!isEditable(field)"
@@ -124,9 +124,10 @@ const schemaObj = computed(() => {
   return props.formSchema
 })
 
-// 获取可见字段列表
+// 获取可见字段列表（确保为数组）
 const visibleFields = computed(() => {
-  return (schemaObj.value.fields || []).filter(field => field.visible !== 0 && field.visible !== false)
+  const fields = Array.isArray(schemaObj.value?.fields) ? schemaObj.value.fields : []
+  return fields.filter(field => field.visible !== 0 && field.visible !== false)
 })
 
 // 判断字段是否可编辑
@@ -152,7 +153,8 @@ function getOptions(field) {
 function initFormData() {
   const data = { ...props.modelValue }
   // 确保所有字段都有默认值
-  (schemaObj.value.fields || []).forEach(field => {
+  const fields = Array.isArray(schemaObj.value?.fields) ? schemaObj.value.fields : []
+  fields.forEach(field => {
     if (!(field.name in data)) {
       if (field.type === 'number') {
         data[field.name] = null
@@ -170,7 +172,8 @@ function initFormData() {
 // 构建表单验证规则
 function buildRules() {
   const rules = {}
-  visibleFields.value.forEach(field => {
+  const fields = Array.isArray(visibleFields.value) ? visibleFields.value : []
+  fields.forEach(field => {
     const required = field.required !== false
     if (required) {
       rules[field.name] = [
