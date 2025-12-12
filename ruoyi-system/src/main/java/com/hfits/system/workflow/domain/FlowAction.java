@@ -28,6 +28,9 @@ public class FlowAction extends BaseEntity
     /** 审批意见 */
     private String comment;
 
+    /** 表单数据（审批时可更新） */
+    private String formData;
+
     /** 审批人 */
     private Long operatorId;
 
@@ -83,6 +86,16 @@ public class FlowAction extends BaseEntity
         this.comment = comment;
     }
 
+    public String getFormData()
+    {
+        return formData;
+    }
+
+    public void setFormData(String formData)
+    {
+        this.formData = formData;
+    }
+
     public Long getOperatorId()
     {
         return operatorId;
@@ -112,6 +125,7 @@ public class FlowAction extends BaseEntity
                 .append("stepCode", getStepCode())
                 .append("action", getPass())
                 .append("comment", getComment())
+                .append("formData", getFormData())
                 .append("operatorId", getOperatorId())
                 .append("actionTime", getActionTime())
                 .toString();

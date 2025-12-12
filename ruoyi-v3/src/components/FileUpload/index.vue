@@ -29,7 +29,7 @@
     <!-- 文件列表 -->
     <transition-group ref="uploadFileList" class="upload-file-list el-upload-list el-upload-list--text" name="el-fade-in-linear" tag="ul">
       <li :key="file.uid" class="el-upload-list__item ele-upload-list__item-content" v-for="(file, index) in fileList">
-        <el-link :href="`${baseUrl}${file.url}`" :underline="false" target="_blank">
+        <el-link :href="`${baseUrl}${file.url}`" :underline="false" target="_blank" class="file-link-text">
           <span class="el-icon-document"> {{ getFileName(file.name) }} </span>
         </el-link>
         <div class="ele-upload-list__item-content-action">
@@ -238,9 +238,9 @@ onMounted(() => {
   margin-bottom: 5px;
 }
 .upload-file-list .el-upload-list__item {
-  border: 1px solid #e4e7ed;
-  line-height: 2;
-  margin-bottom: 10px;
+  border: none;
+  line-height: 1.0;
+  margin-bottom: 8px;
   position: relative;
   transition: none !important;
 }
@@ -250,7 +250,11 @@ onMounted(() => {
   align-items: center;
   color: inherit;
 }
+.file-link-text {
+  font-size: 12px;
+}
 .ele-upload-list__item-content-action .el-link {
   margin-right: 10px;
+  font-size: 12px;
 }
 </style>

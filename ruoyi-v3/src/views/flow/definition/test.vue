@@ -101,8 +101,8 @@ import { onMounted, reactive, ref } from "vue"
 import { parseTime } from "@/utils/ruoyi"
 import { listFlowDef } from "@/api/flow/definition"
 import { listInstance } from "@/api/flow/instance"
-import FlowApplyDialog from "@/components/FlowApplyDialog"
-import FlowApproveDialog from "@/components/FlowApproveDialog"
+import FlowApplyDialog from "@/views/flow/flowApplyDialog"
+import FlowApproveDialog from "@/views/flow/flowApproveDialog"
 
 const flowOptions = ref([])
 const selectedFlowId = ref()
@@ -123,8 +123,8 @@ const applyVisible = ref(false)
 const approveVisible = ref(false)
 
 const statusOptions = [
-  { label: "待提交", value: "PENDING", elTagType: "default" },
-  { label: "运行中", value: "RUNNING", elTagType: "primary" },
+  { label: "待提交", value: "PENDING", elTagType: "primary" },
+  { label: "运行中", value: "RUNNING", elTagType: "success" },
   { label: "已关闭", value: "CLOSED", elTagType: "info" }
 ]
 

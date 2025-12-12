@@ -1,33 +1,37 @@
 package com.hfits.system.workflow.service;
 
-import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.StringUtils;
+import static com.hfits.system.workflow.service.FlowDefService.CLOSE_STEP_CODE;
+
+import java.lang.reflect.Method;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.hfits.system.workflow.domain.FlowAction;
+import com.hfits.system.workflow.domain.FlowDef;
 import com.hfits.system.workflow.domain.FlowInstance;
 import com.hfits.system.workflow.domain.FlowStatus;
 import com.hfits.system.workflow.domain.FlowStepDef;
-import com.hfits.system.workflow.domain.FlowDef;
+import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.mapper.FlowActionMapper;
 import com.ruoyi.system.mapper.FlowDefMapper;
 import com.ruoyi.system.mapper.FlowInstanceMapper;
 import com.ruoyi.system.mapper.FlowStepDefMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.context.ApplicationContext;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import static com.hfits.system.workflow.service.FlowDefService.CLOSE_STEP_CODE;
 
 /**
  * 流程实例Service业务层处理
  */
 @Service
 public class FlowInstanceService {
+
+    private static final Logger logger = LoggerFactory.getLogger(FlowInstanceService.class);
     @Autowired
     private FlowInstanceMapper flowInstanceMapper;
 
@@ -151,6 +155,10 @@ public class FlowInstanceService {
 
         instance.setStatus(newStatus);
         instance.setCurrentStepCode(newStep);
+        // 如果审批时提供了表单数据，则更新实例的表单数据
+        if (StringUtils.isNotBlank(action.getFormData())) {
+            instance.setFormData(action.getFormData());
+        }
         instance.setUpdateTime(DateUtils.getNowDate());
         flowInstanceMapper.updateFlowInstance(instance);
 
@@ -176,22 +184,15 @@ public class FlowInstanceService {
         if (parts.length != 2) {
             return;
         }
-        String className = parts[0];
+        String beanName = parts[0];
         String methodName = parts[1];
-        String fullClassName = "com.hfits.system.workflow.tigger." + className;
         try {
-            Class<?> clazz = Class.forName(fullClassName);
-            Method target = clazz.getMethod(methodName, FlowInstance.class);
-            Object bean;
-            try {
-                bean = applicationContext.getBean(clazz);
-            } catch (Exception e) {
-                bean = clazz.getDeclaredConstructor().newInstance();
-            }
+            // 通过beanName获取bean
+            Object bean = applicationContext.getBean(beanName);
+            Method target = bean.getClass().getMethod(methodName, FlowInstance.class);
             target.invoke(bean, instance);
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                 InstantiationException | IllegalAccessException ignored) {
-            // 静默处理，无需影响主流程
+        } catch (Exception e) {
+            logger.error("触发事件失败: " + e.getMessage());
         }
     }
 }

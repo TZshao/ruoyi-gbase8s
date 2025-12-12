@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.hfits.system.workflow.domain.FlowInstance;
@@ -27,15 +28,19 @@ public class FlowStepDefService {
     private FlowStepDefMapper flowStepDefMapper;
 
     @Autowired
-    private FlowTrigger[] flowTrigger;
+    private ApplicationContext applicationContext;
 
     private final Map<String, List<String>> tiggerMap = new HashMap<>();
 
     @PostConstruct
     public void init() {
-        for (FlowTrigger flowTrigger : flowTrigger) {
-            Class<?> clazz = flowTrigger.getClass();
-            List<String> methodList = tiggerMap.computeIfAbsent(clazz.getSimpleName(), k -> new ArrayList<>());
+        // 获取所有FlowTrigger类型的bean名称
+        String[] beanNames = applicationContext.getBeanNamesForType(FlowTrigger.class);
+        
+        for (String beanName : beanNames) {
+            FlowTrigger trigger = applicationContext.getBean(beanName, FlowTrigger.class);
+            Class<?> clazz = trigger.getClass();
+            List<String> methodList = tiggerMap.computeIfAbsent(beanName, k -> new ArrayList<>());
             for (Method method : clazz.getDeclaredMethods()) {
                 if (!Modifier.isPublic(method.getModifiers())) {
                     continue;
@@ -46,7 +51,7 @@ public class FlowStepDefService {
                 }
             }
             if (methodList.isEmpty()) {
-                tiggerMap.remove(clazz.getSimpleName());
+                tiggerMap.remove(beanName);
             }
         }
     }
