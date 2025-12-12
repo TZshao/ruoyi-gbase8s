@@ -134,3 +134,28 @@ export function deptTreeSelect() {
     method: 'get'
   })
 }
+
+// 查询用户数据权限信息
+export function getUserDataScope(userId) {
+  return request({
+    url: '/system/user/dataScope/' + parseStrEmpty(userId),
+    method: 'get'
+  })
+}
+
+// 保存用户数据权限
+export function dataScopeUser(data) {
+  return request({
+    url: '/system/user/dataScope',
+    method: 'put',
+    data: data
+  })
+}
+
+// 查询用户数据权限部门树结构
+export function userDeptTreeSelect(userId) {
+  return request({
+    url: '/system/user/dataScope/deptTree/' + parseStrEmpty(userId),
+    method: 'get'
+  })
+}

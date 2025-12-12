@@ -27,6 +27,9 @@ public class FlowDefService {
     public final static String START_STEP_CODE = "RISE";
     public final static String START_STEP_NAME = "发起申请";
 
+    public final static String APPROVE_STEP_CODE = "APPROVE";
+    public final static String APPROVE_STEP_NAME = "申请审批 1";
+
     public final static String CLOSE_STEP_CODE = "CLOSED";
     public final static String CLOSE_STEP_NAME = "流程关闭";
 
@@ -67,15 +70,27 @@ public class FlowDefService {
         flowDef.setPublish(false);
         int rows = flowDefMapper.insertFlowDef(flowDef);
 
-        // 默认生成发起/关闭步骤，保证流程可用
+        // 默认生成发起/申请/关闭步骤，保证流程可用
         FlowStepDef startStep = new FlowStepDef();
         startStep.setFlowId(flowDef.getId()); //mybatis自动回填的id
         startStep.setStepCode(START_STEP_CODE);
         startStep.setStepName(START_STEP_NAME);
+        startStep.setNextOnPass(APPROVE_STEP_CODE);
         startStep.setOrderNum(1);
         startStep.setCreateBy(flowDef.getCreateBy());
         startStep.setCreateTime(DateUtils.getNowDate());
         flowStepDefMapper.insertFlowStepDef(startStep);
+
+        FlowStepDef approveStep = new FlowStepDef();
+        approveStep.setFlowId(flowDef.getId());
+        approveStep.setStepCode(APPROVE_STEP_CODE);
+        approveStep.setStepName(APPROVE_STEP_NAME);
+        approveStep.setNextOnPass(CLOSE_STEP_CODE);
+        approveStep.setNextOnReject(CLOSE_STEP_CODE);
+        approveStep.setOrderNum(2);
+        approveStep.setCreateBy(flowDef.getCreateBy());
+        approveStep.setCreateTime(DateUtils.getNowDate());
+        flowStepDefMapper.insertFlowStepDef(approveStep);
 
         FlowStepDef closeStep = new FlowStepDef();
         closeStep.setFlowId(flowDef.getId());

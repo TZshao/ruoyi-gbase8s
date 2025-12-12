@@ -31,6 +31,9 @@ public class SysDept extends BaseEntity
     /** 部门名称 */
     private String deptName;
 
+    /** 部门编码 */
+    private String deptCode;
+
     /** 显示顺序 */
     private Integer orderNum;
 
@@ -95,6 +98,16 @@ public class SysDept extends BaseEntity
     public void setDeptName(String deptName)
     {
         this.deptName = deptName;
+    }
+
+    public String getDeptCode()
+    {
+        return deptCode;
+    }
+
+    public void setDeptCode(String deptCode)
+    {
+        this.deptCode = deptCode;
     }
 
     @NotNull(message = "显示顺序不能为空")

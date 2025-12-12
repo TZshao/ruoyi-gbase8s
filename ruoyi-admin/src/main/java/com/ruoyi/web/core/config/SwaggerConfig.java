@@ -3,7 +3,7 @@ package com.ruoyi.web.core.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.ruoyi.common.config.RuoYiConfig;
+import com.ruoyi.common.config.HfitsConfig;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -13,7 +13,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 
 /**
  * Swagger2的接口配置
- * 
+ *
  * @author ruoyi
  */
 @Configuration
@@ -21,8 +21,8 @@ public class SwaggerConfig
 {
     /** 系统基础配置 */
     @Autowired
-    private RuoYiConfig ruoyiConfig;
-    
+    private HfitsConfig ruoyiConfig;
+
     /**
      * 自定义的 OpenAPI 对象
      */
@@ -35,7 +35,7 @@ public class SwaggerConfig
             .addSecurityItem(new SecurityRequirement().addList("apikey"))
             .info(getApiInfo());
     }
-    
+
     @Bean
     public SecurityScheme securityScheme()
     {
@@ -45,7 +45,7 @@ public class SwaggerConfig
             .in(SecurityScheme.In.HEADER)
             .scheme("Bearer");
     }
-    
+
     /**
      * 添加摘要信息
      */

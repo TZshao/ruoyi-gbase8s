@@ -3,7 +3,7 @@
     <el-row :gutter="20">
       <splitpanes :horizontal="appStore.device === 'mobile'" class="default-theme">
         <!--部门数据-->
-        <pane size="16">
+        <pane size="12">
           <el-col>
             <div class="head-container">
               <el-input v-model="deptName" placeholder="请输入部门名称" clearable prefix-icon="Search" style="margin-bottom: 20px" />
@@ -14,7 +14,7 @@
           </el-col>
         </pane>
         <!--用户数据-->
-        <pane size="84">
+        <pane size="88">
           <el-col>
             <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
               <el-form-item label="用户名称" prop="userName">
@@ -78,7 +78,7 @@
                   <span>{{ parseTime(scope.row.createTime) }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" align="center" width="150" class-name="small-padding fixed-width">
+              <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
                 <template #default="scope">
                   <el-tooltip content="修改" placement="top" v-if="scope.row.userId !== 1">
                     <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:user:edit']"></el-button>
@@ -89,9 +89,16 @@
                   <el-tooltip content="重置密码" placement="top" v-if="scope.row.userId !== 1">
                     <el-button link type="primary" icon="Key" @click="handleResetPwd(scope.row)" v-hasPermi="['system:user:resetPwd']"></el-button>
                   </el-tooltip>
-                  <el-tooltip content="分配角色" placement="top" v-if="scope.row.userId !== 1">
-                    <el-button link type="primary" icon="CircleCheck" @click="handleAuthRole(scope.row)" v-hasPermi="['system:user:edit']"></el-button>
-                  </el-tooltip>
+                  <el-dropdown trigger="click" v-if="scope.row.userId !== 1" @command="handleCommand($event, scope.row)">
+                    <el-button link type="primary" icon="ArrowDown"></el-button>
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <el-dropdown-item command="handleAuthRole" v-hasPermi="['system:user:edit']">分配角色</el-dropdown-item>
+                        <el-dropdown-item command="handleDataScope" v-hasPermi="['system:user:edit']">分配数据权限</el-dropdown-item>
+                        <el-dropdown-item command="handleAssignUserGroup" disabled>分配用户组（TODO）</el-dropdown-item>
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
                 </template>
               </el-table-column>
             </el-table>
@@ -112,7 +119,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="归属部门" prop="deptId">
-              <el-tree-select v-model="form.deptId" :data="enabledDeptOptions" :props="{ value: 'id', label: 'label', children: 'children' }" value-key="id" placeholder="请选择归属部门" clearable check-strictly />
+              <el-tree-select v-model="form.deptId" :data="enabledDeptOptions" :props="{ value: 'id', label: 'label', children: 'children' }" value-key="id" placeholder="请选择归属部门" clearable check-strictly @change="handleDeptChange" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -210,13 +217,57 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 分配用户数据权限对话框 -->
+    <el-dialog :title="title" v-model="openDataScope" width="500px" append-to-body>
+      <el-form :model="form" label-width="90px">
+        <el-form-item label="用户名称">
+          <el-input v-model="form.userName" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="用户昵称">
+          <el-input v-model="form.nickName" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="权限范围">
+          <el-select v-model="form.dataScope" @change="dataScopeSelectChange">
+            <el-option
+              v-for="item in dataScopeOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="数据权限" v-show="form.dataScope == 2">
+          <el-checkbox v-model="deptExpand" @change="handleCheckedTreeExpand">展开/折叠</el-checkbox>
+          <el-checkbox v-model="deptNodeAll" @change="handleCheckedTreeNodeAll">全选/全不选</el-checkbox>
+          <el-checkbox v-model="form.deptCheckStrictly" @change="handleCheckedTreeConnect">父子联动</el-checkbox>
+          <el-tree
+            class="tree-border"
+            :data="dataScopeDeptOptions"
+            show-checkbox
+            default-expand-all
+            ref="deptRef"
+            node-key="code"
+            :check-strictly="!form.deptCheckStrictly"
+            empty-text="加载中，请稍候"
+            :props="{ label: 'label', children: 'children' }"
+          ></el-tree>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button type="primary" @click="submitDataScope">确 定</el-button>
+          <el-button @click="cancelDataScope">取 消</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup name="User">
 import { getToken } from "@/utils/auth"
 import useAppStore from '@/store/modules/app'
-import { changeUserStatus, listUser, resetUserPwd, delUser, getUser, updateUser, addUser, deptTreeSelect } from "@/api/system/user"
+import { changeUserStatus, listUser, resetUserPwd, delUser, getUser, updateUser, addUser, deptTreeSelect, getUserDataScope, dataScopeUser, userDeptTreeSelect } from "@/api/system/user"
 import { Splitpanes, Pane } from "splitpanes"
 import "splitpanes/dist/splitpanes.css"
 
@@ -238,9 +289,21 @@ const dateRange = ref([])
 const deptName = ref("")
 const deptOptions = ref(undefined)
 const enabledDeptOptions = ref(undefined)
+const dataScopeDeptOptions = ref([])
 const initPassword = ref(undefined)
 const postOptions = ref([])
 const roleOptions = ref([])
+const openDataScope = ref(false)
+const deptExpand = ref(true)
+const deptNodeAll = ref(false)
+const deptRef = ref(null)
+const dataScopeOptions = ref([
+  { value: "1", label: "全部数据权限" },
+  { value: "2", label: "自定数据权限" },
+  { value: "3", label: "本部门数据权限" },
+  { value: "4", label: "本部门及以下数据权限" },
+  { value: "5", label: "仅本人数据权限" }
+])
 /*** 用户导入参数 */
 const upload = reactive({
   // 是否显示弹出层（用户导入）
@@ -336,6 +399,34 @@ function handleNodeClick(data) {
   handleQuery()
 }
 
+/** 部门选择变更事件 */
+function handleDeptChange(deptId) {
+  if (deptId) {
+    const dept = findDeptById(enabledDeptOptions.value, deptId)
+    if (dept) {
+      form.value.deptCode = dept.code
+    }
+  } else {
+    form.value.deptCode = undefined
+  }
+}
+
+/** 根据部门ID查找部门信息 */
+function findDeptById(deptList, deptId) {
+  for (const dept of deptList) {
+    if (dept.id === deptId) {
+      return dept
+    }
+    if (dept.children && dept.children.length > 0) {
+      const found = findDeptById(dept.children, deptId)
+      if (found) {
+        return found
+      }
+    }
+  }
+  return null
+}
+
 /** 搜索按钮操作 */
 function handleQuery() {
   queryParams.value.pageNum = 1
@@ -390,6 +481,12 @@ function handleCommand(command, row) {
     case "handleAuthRole":
       handleAuthRole(row)
       break
+    case "handleDataScope":
+      handleDataScope(row)
+      break
+    case "handleAssignUserGroup":
+      handleAssignUserGroup(row)
+      break
     default:
       break
   }
@@ -399,6 +496,96 @@ function handleCommand(command, row) {
 function handleAuthRole(row) {
   const userId = row.userId
   router.push("/system/user-auth/role/" + userId)
+}
+
+/** 分配用户组占位 */
+function handleAssignUserGroup() {
+  proxy.$modal.msgWarning("分配用户组功能开发中")
+}
+
+/** 分配数据权限 */
+function handleDataScope(row) {
+  reset()
+  const userId = row.userId
+  title.value = "分配数据权限"
+  const deptTreePromise = userDeptTreeSelect(userId).then(response => {
+    dataScopeDeptOptions.value = response.depts || []
+    return response
+  })
+  getUserDataScope(userId).then(response => {
+    form.value = Object.assign({}, form.value, response.data)
+    form.value.userId = userId
+    form.value.userName = form.value.userName || row.userName
+    form.value.nickName = form.value.nickName || row.nickName
+    openDataScope.value = true
+    nextTick(() => {
+      deptTreePromise.then(res => {
+        nextTick(() => {
+          if (deptRef.value) {
+            deptRef.value.setCheckedKeys(res.checkedKeys || [])
+          }
+        })
+      })
+    })
+  })
+}
+
+/** 数据权限范围切换 */
+function dataScopeSelectChange(value) {
+  if (value !== "2" && deptRef.value) {
+    deptRef.value.setCheckedKeys([])
+  }
+}
+
+/** 树（展开/折叠） */
+function handleCheckedTreeExpand(value) {
+  let treeList = dataScopeDeptOptions.value
+  for (let i = 0; i < treeList.length; i++) {
+    if (deptRef.value && deptRef.value.store.nodesMap[treeList[i].code]) {
+      deptRef.value.store.nodesMap[treeList[i].code].expanded = value
+    }
+  }
+}
+
+/** 树（全选/全不选） */
+function handleCheckedTreeNodeAll(value) {
+  if (deptRef.value) {
+    deptRef.value.setCheckedNodes(value ? dataScopeDeptOptions.value : [])
+  }
+}
+
+/** 树（父子联动） */
+function handleCheckedTreeConnect(value) {
+  form.value.deptCheckStrictly = value ? true : false
+}
+
+/** 所有部门节点数据 */
+function getDeptAllCheckedKeys() {
+  if (!deptRef.value) {
+    return []
+  }
+  let checkedKeys = deptRef.value.getCheckedKeys()
+  let halfCheckedKeys = deptRef.value.getHalfCheckedKeys()
+  checkedKeys.unshift.apply(checkedKeys, halfCheckedKeys)
+  return checkedKeys
+}
+
+/** 数据权限提交 */
+function submitDataScope() {
+  if (form.value.userId != undefined) {
+    form.value.authDeptCodes = getDeptAllCheckedKeys()
+    dataScopeUser(form.value).then(() => {
+      proxy.$modal.msgSuccess("修改成功")
+      openDataScope.value = false
+      getList()
+    })
+  }
+}
+
+/** 数据权限取消 */
+function cancelDataScope() {
+  openDataScope.value = false
+  reset()
 }
 
 /** 重置密码按钮操作 */
@@ -477,9 +664,15 @@ function submitFileForm() {
 
 /** 重置操作表单 */
 function reset() {
+  if (deptRef.value != undefined) {
+    deptRef.value.setCheckedKeys([])
+  }
+  deptExpand.value = true
+  deptNodeAll.value = false
   form.value = {
     userId: undefined,
     deptId: undefined,
+    deptCode: undefined,
     userName: undefined,
     nickName: undefined,
     password: undefined,
@@ -489,7 +682,10 @@ function reset() {
     status: "0",
     remark: undefined,
     postIds: [],
-    roleIds: []
+    roleIds: [],
+    dataScope: undefined,
+    deptCheckStrictly: true,
+    authDeptCodes: []
   }
   proxy.resetForm("userRef")
 }
@@ -522,6 +718,15 @@ function handleUpdate(row) {
     roleOptions.value = response.roles
     form.value.postIds = response.postIds
     form.value.roleIds = response.roleIds
+    // 如果后端返回了 deptCode，确保设置它；如果没有，根据 deptId 查找
+    if (form.value.deptId && !form.value.deptCode) {
+      nextTick(() => {
+        const dept = findDeptById(enabledDeptOptions.value, form.value.deptId)
+        if (dept) {
+          form.value.deptCode = dept.code
+        }
+      })
+    }
     open.value = true
     title.value = "修改用户"
     form.password = ""

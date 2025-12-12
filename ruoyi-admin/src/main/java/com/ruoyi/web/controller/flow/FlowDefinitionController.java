@@ -72,11 +72,6 @@ public class FlowDefinitionController extends BaseController {
         return toAjaxR(flowDefService.updateFlowDef(flowDef));
     }
 
-    @PreAuthorize("@ss.hasPermi('flow:def:remove')")
-    @DeleteMappingLog(value = "/{ids}", title = "流程删除", businessType = BusinessType.DELETE)
-    public R<?> remove(@PathVariable Long[] ids) {
-        return toAjaxR(flowDefService.deleteFlowDefByIds(ids));
-    }
 
     @PreAuthorize("@ss.hasPermi('flow:def:edit')")
     @PostMappingLog(value = "/publish/{id}",title = "流程发布", businessType = BusinessType.UPDATE)

@@ -15,7 +15,7 @@ import com.ruoyi.common.xss.Xss;
 
 /**
  * 用户对象 sys_user
- * 
+ *
  * @author ruoyi
  */
 public class SysUser extends BaseEntity
@@ -27,8 +27,10 @@ public class SysUser extends BaseEntity
     private Long userId;
 
     /** 部门ID */
-    @Excel(name = "部门编号", type = Type.IMPORT)
+    @Excel(name = "部门ID", type = Type.IMPORT)
     private Long deptId;
+    @Excel(name = "部门编码", type = Type.IMPORT)
+    private String deptCode;
 
     /** 用户账号 */
     @Excel(name = "登录名称")
@@ -59,6 +61,15 @@ public class SysUser extends BaseEntity
     /** 账号状态（0正常 1停用） */
     @Excel(name = "账号状态", readConverterExp = "0=正常,1=停用")
     private String status;
+
+    /** 数据范围（1：所有 2：自定义 3：本部门 4：本部门及以下 5：仅本人） */
+    private String dataScope;
+
+    /** 部门树选择项是否关联显示（0不关联 1关联） */
+    private boolean deptCheckStrictly;
+
+    /** 部门组（数据权限） */
+    private String[] authDeptCodes;
 
     /** 删除标志（0代表存在 2代表删除） */
     private String delFlag;
@@ -222,6 +233,42 @@ public class SysUser extends BaseEntity
         this.status = status;
     }
 
+    public String getDataScope()
+    {
+        return dataScope;
+    }
+
+    public void setDataScope(String dataScope)
+    {
+        this.dataScope = dataScope;
+    }
+
+    public boolean isDeptCheckStrictly()
+    {
+        return deptCheckStrictly;
+    }
+
+    public void setDeptCheckStrictly(boolean deptCheckStrictly)
+    {
+        this.deptCheckStrictly = deptCheckStrictly;
+    }
+
+    public String getDeptCode() {
+        return deptCode;
+    }
+
+    public void setDeptCode(String deptCode) {
+        this.deptCode = deptCode;
+    }
+
+    public String[] getAuthDeptCodes() {
+        return authDeptCodes;
+    }
+
+    public void setAuthDeptCodes(String[] authDeptCodes) {
+        this.authDeptCodes = authDeptCodes;
+    }
+
     public String getDelFlag()
     {
         return delFlag;
@@ -325,6 +372,8 @@ public class SysUser extends BaseEntity
             .append("avatar", getAvatar())
             .append("password", getPassword())
             .append("status", getStatus())
+            .append("dataScope", getDataScope())
+            .append("deptCheckStrictly", isDeptCheckStrictly())
             .append("delFlag", getDelFlag())
             .append("loginIp", getLoginIp())
             .append("loginDate", getLoginDate())

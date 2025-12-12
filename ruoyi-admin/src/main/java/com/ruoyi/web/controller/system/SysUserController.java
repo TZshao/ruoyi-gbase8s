@@ -31,6 +31,7 @@ import com.ruoyi.system.service.ISysDeptService;
 import com.ruoyi.system.service.ISysPostService;
 import com.ruoyi.system.service.ISysRoleService;
 import com.ruoyi.system.service.ISysUserService;
+import java.util.Collections;
 
 /**
  * 用户信息
@@ -242,6 +243,46 @@ public class SysUserController extends BaseController
         roleService.checkRoleDataScope(roleIds);
         userService.insertUserAuth(userId, roleIds);
         return success();
+    }
+
+    /**
+     * 获取用户数据权限信息
+     */
+    @PreAuthorize("@ss.hasPermi('system:user:query')")
+    @GetMapping("/dataScope/{userId}")
+    public AjaxResult getDataScope(@PathVariable("userId") Long userId)
+    {
+        userService.checkUserDataScope(userId);
+        SysUser user = userService.selectUserDataScope(userId);
+        return success(user);
+    }
+
+    /**
+     * 查询用户数据权限部门树结构
+     */
+    @PreAuthorize("@ss.hasPermi('system:user:list')")
+    @GetMapping("/dataScope/deptTree/{userId}")
+    public AjaxResult dataScopeDeptTree(@PathVariable("userId") Long userId)
+    {
+        AjaxResult ajax = AjaxResult.success();
+        ajax.put("depts", deptService.selectDeptTreeList(new SysDept()));
+        SysUser user = userService.selectUserDataScope(userId);
+        ajax.put("checkedKeys", user != null && user.getAuthDeptCodes() != null ? java.util.Arrays.asList(user.getAuthDeptCodes()) : Collections.emptyList());
+        return ajax;
+    }
+
+    /**
+     * 保存用户数据权限
+     */
+    @PreAuthorize("@ss.hasPermi('system:user:edit')")
+    @Log(title = "用户管理", businessType = BusinessType.UPDATE)
+    @PutMapping("/dataScope")
+    public AjaxResult dataScope(@RequestBody SysUser user)
+    {
+        userService.checkUserAllowed(user);
+        userService.checkUserDataScope(user.getUserId());
+        user.setUpdateBy(getUsername());
+        return toAjax(userService.authUserDataScope(user));
     }
 
     /**

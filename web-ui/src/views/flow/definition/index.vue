@@ -98,7 +98,7 @@
     </el-dialog>
 
     <!-- 配置流程步骤弹窗 -->
-    <el-dialog title="配置流程" v-model="stepDialogOpen" width="1000px" append-to-body align-center destroy-on-close>
+    <el-dialog title="配置流程" v-model="stepDialogOpen" width="1400px" append-to-body align-center destroy-on-close>
       <div class="mb10">
         <el-button type="primary" plain icon="Plus" @click="handleAddStep" v-hasPermi="['flow:step:add']">新增步骤</el-button>
       </div>
@@ -106,7 +106,7 @@
         <el-table-column label="顺序" prop="orderNum" width="80" />
         <el-table-column label="名称">
           <template #default="scope">
-            {{scope.row.stepName+' ('+scope.row.stepCode+')'}}
+            {{scope.row.stepName}}
           </template>
         </el-table-column>
         <el-table-column label="通过" prop="nextOnPass" width="140">
@@ -114,11 +114,13 @@
             {{ getStepNameByCode(scope.row.nextOnPass) || scope.row.nextOnPass || '-' }}
           </template>
         </el-table-column>
+        <el-table-column label="通过事件" prop="eventOnPass" width="140"/>
         <el-table-column label="拒绝" prop="nextOnReject" width="140">
           <template #default="scope">
             {{ getStepNameByCode(scope.row.nextOnReject) || scope.row.nextOnReject || '-' }}
           </template>
         </el-table-column>
+        <el-table-column label="拒绝事件" prop="eventOnReject" width="140"/>
         <el-table-column label="审批类型" prop="handlerType" width="120" />
         <el-table-column label="处理人值" prop="handlerValue" />
         <el-table-column label="操作" align="center" width="150">
@@ -221,64 +223,100 @@
     </el-dialog>
 
     <!-- 配置表单结构弹窗 -->
-    <el-dialog title="配置表单结构" v-model="formSchemaDialogOpen" width="1000px" append-to-body align-center destroy-on-close>
+    <el-dialog title="配置表单结构" v-model="formSchemaDialogOpen" width="1180x" append-to-body align-center destroy-on-close>
       <el-form ref="formSchemaRef" :model="formSchemaForm" label-width="120px">
-        <el-alert type="info" :closable="false" class="mb10">
-          <template #title>字段仅在允许的步骤号内可编辑。</template>
-        </el-alert>
-        <el-table :data="formSchemaForm.fields" border style="width: 100%" height="420px">
-          <el-table-column label="启用步骤" width="180">
-            <template #default="scope">
-              <el-select v-model="scope.row.enableIn" placeholder="请选择步骤" multiple filterable collapse-tags collapse-tags-tooltip style="width: 100%">
-                <el-option v-for="item in formStepOptions" :key="item.value" :label="item.label" :value="item.value" />
-              </el-select>
-            </template>
-          </el-table-column>
-          <el-table-column label="字段名" width="150">
-            <template #default="scope">
-              <el-input v-model="scope.row.name" placeholder="字段名" />
-            </template>
-          </el-table-column>
-          <el-table-column label="字段标签" width="150">
-            <template #default="scope">
-              <el-input v-model="scope.row.label" placeholder="字段标签" />
-            </template>
-          </el-table-column>
-          <el-table-column label="字段类型" width="150">
-            <template #default="scope">
-              <el-select v-model="scope.row.type" placeholder="请选择" style="width: 100%">
-                <el-option label="下拉(select)" value="select" />
-                <el-option label="日期(date)" value="date" />
-                <el-option label="数字(number)" value="number" />
-                <el-option label="字符串(String)" value="string" />
-                <el-option label="文本(text)" value="text" />
-                <el-option label="文件(file)" value="file" />
-              </el-select>
-            </template>
-          </el-table-column>
-          <el-table-column label="可见性" width="130" align="center">
-            <template #default="scope">
-              <el-switch
-                v-model="scope.row.visible"
-                :active-value="1"
-                :inactive-value="0"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column label="必填" width="100" align="center">
-            <template #default="scope">
-              <el-switch v-model="scope.row.required" :active-value="true" :inactive-value="false"/>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作" width="100" align="center">
-            <template #default="scope">
-              <el-button link type="danger" icon="Delete" @click="removeField(scope.$index)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <div class="mt10">
-          <el-button type="primary" plain icon="Plus" @click="addField">添加字段</el-button>
-        </div>
+        <el-tabs v-model="formSchemaActiveTab">
+          <el-tab-pane label="字段表单" name="fields">
+            <el-alert type="info" :closable="false" class="mb10">
+              <template #title>字段仅在允许的步骤号内可编辑。</template>
+            </el-alert>
+            <el-alert
+              v-if="isCustomPageEnabled"
+              class="mb10"
+              type="warning"
+              :closable="false"
+              title="已启用自定义页面，字段列表将不会生效。"
+            />
+            <el-table :data="formSchemaForm.fields" border style="width: 100%" height="420px">
+              <el-table-column label="启用步骤" width="180">
+                <template #default="scope">
+                  <el-select v-model="scope.row.enableIn" placeholder="请选择步骤" multiple filterable collapse-tags collapse-tags-tooltip style="width: 100%" :disabled="isCustomPageEnabled">
+                    <el-option v-for="item in formStepOptions" :key="item.value" :label="item.label" :value="item.value" />
+                  </el-select>
+                </template>
+              </el-table-column>
+              <el-table-column label="字段标签" width="150">
+                <template #default="scope">
+                  <el-input v-model="scope.row.label" placeholder="字段标签" :disabled="isCustomPageEnabled" />
+                </template>
+              </el-table-column>
+              <el-table-column label="字段名" width="150">
+                <template #default="scope">
+                  <el-input v-model="scope.row.name" placeholder="字段名" :disabled="isCustomPageEnabled" />
+                </template>
+              </el-table-column>
+              <el-table-column label="字段类型" width="150">
+                <template #default="scope">
+                  <el-select v-model="scope.row.type" placeholder="请选择" style="width: 100%" :disabled="isCustomPageEnabled" @change="handleTypeChange(scope.row)">
+                    <el-option label="下拉" value="select" />
+                    <el-option label="日期" value="date" />
+                    <el-option label="数字" value="number" />
+                    <el-option label="字符串" value="string" />
+                    <el-option label="文本" value="text" />
+                    <el-option label="文件" value="file" />
+                  </el-select>
+                </template>
+              </el-table-column>
+              <el-table-column label="字典类型" width="180" v-if="hasSelectField">
+                <template #default="scope">
+                  <el-select 
+                    v-if="scope.row.type === 'select'"
+                    v-model="scope.row.dictType" 
+                    placeholder="请选择字典类型" 
+                    style="width: 100%" 
+                    filterable
+                    clearable
+                    :disabled="isCustomPageEnabled"
+                  >
+                    <el-option 
+                      v-for="item in dictTypeOptions" 
+                      :key="item.dictType" 
+                      :label="item.dictName" 
+                      :value="item.dictType" 
+                    />
+                  </el-select>
+                  <span v-else style="color: #909399;">-</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="必填" width="100" align="center">
+                <template #default="scope">
+                  <el-switch v-model="scope.row.required" :active-value="true" :inactive-value="false" :disabled="isCustomPageEnabled"/>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" width="100" align="center">
+                <template #default="scope">
+                  <el-button link type="danger" icon="Delete" @click="removeField(scope.$index)" :disabled="isCustomPageEnabled">删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div class="mt10">
+              <el-button type="primary" plain icon="Plus" @click="addField" :disabled="isCustomPageEnabled">添加字段</el-button>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane label="自定义页面" name="custom">
+            <el-form-item label="启用自定义页">
+              <el-switch v-model="formSchemaForm.customPage.enabled" :active-value="true" :inactive-value="false" />
+            </el-form-item>
+            <el-form-item label="组件路径" prop="customPage.component">
+              <el-input v-model="formSchemaForm.customPage.component" placeholder="例如：@/views/flow/customizeFromTemplate.vue" clearable />
+            </el-form-item>
+            <el-alert
+              type="info"
+              :closable="false"
+              title="启用后，表单将直接渲染此组件，不再生成字段。"
+            />
+          </el-tab-pane>
+        </el-tabs>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -374,6 +412,7 @@
 import { listFlowDef, getFlowDef, addFlowDef, updateFlowDef, delFlowDef, publishFlowDef, iterateFlowDef, listFlowDefByFlowCode } from "@/api/flow/definition"
 import { listFlowStep, getFlowStep, addFlowStep, updateFlowStep, delFlowStep, listStepTriggers } from "@/api/flow/step"
 import { listInstance } from "@/api/flow/instance"
+import { optionselect } from "@/api/system/dict/type"
 import { useRouter } from "vue-router"
 
 const router = useRouter()
@@ -442,11 +481,20 @@ const formStepOptions = computed(() => {
 
 // 配置表单结构相关
 const formSchemaDialogOpen = ref(false)
+const formSchemaActiveTab = ref("fields")
 const formSchemaForm = reactive({
   flowId: null,
-  fields: []
+  fields: [],
+  customPage: {
+    enabled: false,
+    component: ""
+  }
 })
 const formStepList = ref([])
+const dictTypeOptions = ref([])
+const hasSelectField = computed(() => {
+  return formSchemaForm.fields.some(field => field.type === 'select')
+})
 
 function normalizeField(field = {}) {
   // 处理enableIn字段：如果是字符串（逗号分隔），转换为数组；如果是数组，保持原样
@@ -461,11 +509,20 @@ function normalizeField(field = {}) {
     label: "",
     type: "string",
     required: true,
-    visible: 1,
+    dictType: "",
     ...field,
     enableIn: enableIn
   }
 }
+
+function normalizeCustomPage(custom = {}) {
+  return {
+    enabled: false,
+    component: "",
+    ...custom
+  }
+}
+const isCustomPageEnabled = computed(() => !!formSchemaForm.customPage?.enabled)
 
 // 版本迭代相关
 const iterateDialogOpen = ref(false)
@@ -717,15 +774,40 @@ function handleDeleteStep(row) {
 // 配置表单结构
 function openConfigForm(row) {
   formSchemaForm.flowId = row.id
+  formSchemaActiveTab.value = "fields"
   try {
-    const schema = row.formSchema ? JSON.parse(row.formSchema) : { fields: [] }
+    const schema = row.formSchema ? JSON.parse(row.formSchema) : { fields: [], customPage: {} }
     formSchemaForm.fields = (schema.fields || []).map(item => normalizeField(item))
+    formSchemaForm.customPage = normalizeCustomPage(schema.customPage || {})
   } catch (e) {
     formSchemaForm.fields = []
+    formSchemaForm.customPage = normalizeCustomPage()
   }
   // 加载该流程的步骤列表
   loadFormStepList(row.id)
+  // 加载字典类型列表
+  loadDictTypeOptions()
+  if (formSchemaForm.customPage.enabled) {
+    formSchemaActiveTab.value = "custom"
+  }
   formSchemaDialogOpen.value = true
+}
+
+// 加载字典类型列表
+function loadDictTypeOptions() {
+  optionselect().then(res => {
+    dictTypeOptions.value = res.data || []
+  }).catch(() => {
+    dictTypeOptions.value = []
+  })
+}
+
+// 处理字段类型变化
+function handleTypeChange(field) {
+  // 如果类型不是下拉，清除字典类型
+  if (field.type !== 'select') {
+    field.dictType = ""
+  }
 }
 
 function loadFormStepList(flowId) {
@@ -751,8 +833,10 @@ function removeField(index) {
 
 function submitFormSchema() {
   // 将enableIn数组转换为逗号分隔的字符串保存
+  const normalizedCustom = normalizeCustomPage(formSchemaForm.customPage)
   const schema = {
-    fields: formSchemaForm.fields.map(item => {
+    customPage: normalizedCustom,
+    fields: normalizedCustom.enabled ? [] : formSchemaForm.fields.map(item => {
       const field = normalizeField(item)
       return {
         ...field,

@@ -4,6 +4,7 @@
 drop table if exists sys_dept;
 create table sys_dept (
                           dept_id           SERIAL8 not null primary key    ,
+                          dept_code         varchar(100) not null               ,
                           parent_id         bigint      default 0                  ,
                           ancestors         varchar(50)     default ''                 ,
                           dept_name         varchar(30)     default ''                 ,
@@ -16,30 +17,25 @@ create table sys_dept (
                           create_by         varchar(64)     default ''                 ,
                           create_time 	    DATETIME YEAR TO SECOND                                   ,
                           update_by         varchar(64)     default ''                 ,
-                          update_time       DATETIME YEAR TO SECOND
+                          update_time       DATETIME YEAR TO SECOND                 ,
+                        UNIQUE(dept_code)
+
 ) ;
-comment on column sys_dept.dept_id is '部门ID';
-comment on column sys_dept.parent_id is '父部门ID';
-comment on column sys_dept.ancestors is '祖级列表';
-comment on column sys_dept.dept_name is '部门名称';
-comment on column sys_dept.order_num is '显示顺序';
-comment on column sys_dept.leader is '负责人';
-comment on column sys_dept.phone is '联系电话';
-comment on column sys_dept.email is '邮箱';
+
 comment on column sys_dept.status is '部门状态:0正常,1停用';
 -- ----------------------------
 -- 初始化-部门表数据
 -- ----------------------------
-insert into sys_dept values(100,  0,   '0',          '若依科技',   0, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
-insert into sys_dept values(101,  100, '0,100',      '深圳总公司', 1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
-insert into sys_dept values(102,  100, '0,100',      '长沙分公司', 2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
-insert into sys_dept values(103,  101, '0,100,101',  '研发部门',   1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
-insert into sys_dept values(104,  101, '0,100,101',  '市场部门',   2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
-insert into sys_dept values(105,  101, '0,100,101',  '测试部门',   3, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
-insert into sys_dept values(106,  101, '0,100,101',  '财务部门',   4, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
-insert into sys_dept values(107,  101, '0,100,101',  '运维部门',   5, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
-insert into sys_dept values(108,  102, '0,100,102',  '市场部门',   1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
-insert into sys_dept values(109,  102, '0,100,102',  '财务部门',   2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
+insert into sys_dept values(100,'100',  0,   '0',          '若依科技',   0, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
+insert into sys_dept values(101,'10001',  100, '0,100',      '深圳总公司', 1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
+insert into sys_dept values(102, '10002', 100, '0,100',      '长沙分公司', 2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
+insert into sys_dept values(103,'1000101',  101, '0,100,101',  '研发部门',   1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
+insert into sys_dept values(104,'1000102',  101, '0,100,101',  '市场部门',   2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
+insert into sys_dept values(105,'1000103',  101, '0,100,101',  '测试部门',   3, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
+insert into sys_dept values(106,'1000104',  101, '0,100,101',  '财务部门',   4, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
+insert into sys_dept values(107,'1000105', 101, '0,100,101',  '运维部门',   5, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
+insert into sys_dept values(108,'1000201', 102, '0,100,102',  '市场部门',   1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
+insert into sys_dept values(109,'1000202',  102, '0,100,102',  '财务部门',   2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', now(), '', null);
 
 
 -- ----------------------------
@@ -49,6 +45,7 @@ drop table if exists sys_user;
 create table sys_user (
                           user_id           SERIAL8 not null   primary key ,
                           dept_id           bigint      default null               ,
+                          dept_code         varchar(100)    default ''               ,
                           user_name         varchar(30)     not null                   ,
                           nick_name         varchar(30)     not null                   ,
                           user_type         varchar(2)      default '00'               ,
@@ -65,16 +62,28 @@ create table sys_user (
                           create_by         varchar(64)     default ''                 ,
                           create_time       DATETIME YEAR TO SECOND                                   ,
                           update_by         varchar(64)     default ''                 ,
-                          update_time       DATETIME YEAR TO SECOND                                   ,
+                          update_time       DATETIME YEAR TO SECOND                    ,
+                          data_scope        varchar(10)     default '1'                ,
+                          dept_check_strictly char(1)         default '1'                ,
                           remark            varchar(500)    default null
 ) ;
+comment on column sys_user.data_scope is '数据范围（1：所有 2：自定义 3：本部门 4：本部门及以下 5：仅本人）';
+comment on column sys_user.dept_check_strictly is '部门树选择项是否关联显示（0不关联 1关联）';
 
 -- ----------------------------
 -- 初始化-用户信息表数据
 -- ----------------------------
-insert into sys_user values(1,  103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', now(), now(), 'admin', now(), '', null, '管理员');
-insert into sys_user values(2,  105, 'ry',    '若依', '00', 'ry@qq.com',  '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', now(), now(), 'admin', now(), '', null, '测试员');
+insert into sys_user values(1,  103, '1000101','admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', now(), now(), 'admin', now(), '', null, '1', '0', '管理员');
+insert into sys_user values(2,  105, '1000103','ry',    '若依', '00', 'ry@qq.com',  '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', now(), now(), 'admin', now(), '', null, '1', '0', '测试员');
 
+drop table if exists sys_user_dept;
+create table sys_user_dept (
+    user_id bigint not null,
+    dept_id bigint not null,
+    UNIQUE(user_id, dept_id)
+) ;
+comment on column sys_user_dept.user_id is '用户ID';
+comment on column sys_user_dept.dept_id is '部门ID';
 
 -- ----------------------------
 -- 3、岗位信息表

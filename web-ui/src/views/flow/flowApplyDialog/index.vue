@@ -1,39 +1,30 @@
 <template>
   <el-dialog
     :title="dialogTitle"
-    width="900px"
+    width="1200px"
     :model-value="modelValue"
     :close-on-click-modal="false"
     destroy-on-close
     @update:model-value="emit('update:modelValue', $event)"
     @close="handleClose"
   >
-    <el-row :gutter="20">
-      <el-col :span="8">
-        <el-card shadow="never" class="steps-card" v-loading="loading">
-          <div class="steps-title">流程步骤</div>
-          <el-steps direction="vertical" :active="activeStepIndex" finish-status="success">
-            <el-step
-              v-for="step in stepList"
-              :key="step.stepCode"
-              :title="`${step.orderNum ?? ''} ${step.stepName}`.trim()"
-              :description="`编码：${step.stepCode}`"
-            />
-          </el-steps>
-        </el-card>
-      </el-col>
-      <el-col :span="16">
-        <el-card shadow="never" v-loading="loading || saving">
-          <FlowFrom
-            ref="formFromRef"
-            :form-schema="formSchema"
-            v-model="formData"
-            :current-step="currentStepCode"
-            label-width="110px"
-          />
-        </el-card>
-      </el-col>
-    </el-row>
+      <el-steps :active="activeStepIndex" finish-status="success" simple align-center style="margin-bottom: 10px;">
+        <el-step
+          v-for="step in stepList"
+          :key="step.stepCode"
+          :title="`${step.orderNum ?? ''} ${step.stepName}`.trim()"
+        />
+      </el-steps>
+
+    <el-card shadow="never" v-loading="loading || saving" class="form-card">
+      <FlowFrom
+        ref="formFromRef"
+        :form-schema="formSchema"
+        v-model="formData"
+        :current-step="currentStepCode"
+        label-width="110px"
+      />
+    </el-card>
     <template #footer>
       <el-button @click="handleClose">取消</el-button>
       <el-button :loading="saving" @click="handleSave">暂存</el-button>
@@ -47,7 +38,7 @@ import { computed, ref, watch } from "vue"
 import { getFlowDef } from "@/api/flow/definition"
 import { getInstance, startInstance, updateInstance, submitInstance } from "@/api/flow/instance"
 import { listFlowStep } from "@/api/flow/step"
-import FlowFrom from "@/components/FlowFrom"
+import FlowFrom from "@/views/flow/flowFrom/from.vue"
 import { ElMessage } from "element-plus"
 
 const props = defineProps({
@@ -60,6 +51,13 @@ const props = defineProps({
   title: {
     type: String,
     default: "发起申请"
+  },
+  // 初始表单数据，用于外部传入数据（如项目ID等）
+  // 这些数据会合并到表单数据中并保存，无需在表单配置中设置 visible=false 的隐藏字段
+  // 如果需要在表单中显示但不允许编辑，可以在表单配置中添加字段并设置 enableIn=[]（不在任何步骤可编辑）
+  initialFormData: {
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -106,12 +104,16 @@ async function initData() {
       resolvedInstanceId.value = instance.id
       instanceStatus.value = instance.status || ""
       currentStepCode.value = instance.currentStepCode || "RISE"
-      formData.value = safeParse(instance.formData)
+      // 合并实例数据和外部传入的初始数据（外部数据优先级更高，会覆盖实例中的同名字段）
+      const instanceFormData = safeParse(instance.formData)
+      formData.value = { ...instanceFormData, ...props.initialFormData }
     } else {
       resolvedInstanceId.value = null
       instanceStatus.value = ""
       currentStepCode.value = "RISE"
-      formData.value = {}
+      // 新建流程时，使用外部传入的初始数据
+      // 这些数据会传递给 FlowFrom 组件，即使不在 schema 中定义也会被保存
+      formData.value = { ...props.initialFormData }
     }
     resolvedFlowId.value = flowId
     await Promise.all([
@@ -176,12 +178,12 @@ async function saveOrUpdateInstance(isSubmit) {
       flowId: resolvedFlowId.value,
       formData: JSON.stringify(formData.value || {})
     }
-    
+
     if (resolvedInstanceId.value) {
       // 更新已存在的实例
       payload.id = resolvedInstanceId.value
       await updateInstance(payload)
-      
+
       // 如果是提交操作，调用提交接口
       if (isSubmit) {
         await submitInstance(resolvedInstanceId.value)
@@ -190,14 +192,14 @@ async function saveOrUpdateInstance(isSubmit) {
         handleClose()
       } else {
         ElMessage.success("暂存成功")
-        emit("saved")
+        emit("saved") //出发父组件 @saved方法，父组件就可以执行 getList，or others
       }
     } else {
       // 创建新实例
       const res = await startInstance(payload)
       const instance = res.data
       const newInstanceId = instance?.id
-      
+
       // 如果是提交操作，调用提交接口
       if (isSubmit && newInstanceId) {
         await submitInstance(newInstanceId)
@@ -223,11 +225,14 @@ async function saveOrUpdateInstance(isSubmit) {
 
 <style scoped>
 .steps-card {
-  height: 100%;
+  margin-bottom: 12px;
 }
 .steps-title {
   font-weight: 600;
   margin-bottom: 12px;
+}
+.form-card {
+  margin-top: 0;
 }
 </style>
 

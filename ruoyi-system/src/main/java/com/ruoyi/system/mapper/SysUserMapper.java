@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.system.domain.SysUserDept;
 
 /**
  * 用户表 数据层
@@ -144,4 +145,60 @@ public interface SysUserMapper
      * @return 结果
      */
     public SysUser checkEmailUnique(String email);
+
+    /**
+     * 删除用户与部门关联
+     *
+     * @param userId 用户ID
+     * @return 结果
+     */
+    public int deleteUserDeptByUserId(Long userId);
+
+    /**
+     * 批量删除用户与部门关联
+     *
+     * @param userIds 用户ID数组
+     * @return 结果
+     */
+    public int deleteUserDept(Long[] userIds);
+
+    /**
+     * 批量新增用户部门信息
+     *
+     * @param userDeptList 用户部门列表
+     * @return 结果
+     */
+    public int batchUserDept(List<SysUserDept> userDeptList);
+
+    /**
+     * 查询用户已分配的部门ID集合
+     *
+     * @param userId 用户ID
+     * @return 部门ID集合
+     */
+    public List<Long> selectUserDeptListByUserId(Long userId);
+
+    /**
+     * 根据部门ID列表查询部门编码列表
+     *
+     * @param deptIds 部门ID列表
+     * @return 部门编码列表
+     */
+    public List<String> selectDeptCodesByIds(@Param("deptIds") List<Long> deptIds);
+
+    /**
+     * 根据部门编码列表查询部门ID列表
+     *
+     * @param deptCodes 部门编码列表
+     * @return 部门ID列表
+     */
+    public List<Long> selectDeptIdsByCodes(@Param("deptCodes") String[] deptCodes);
+
+    /**
+     * 更新用户数据范围字段
+     *
+     * @param user 用户信息
+     * @return 结果
+     */
+    public int updateUserDataScope(SysUser user);
 }

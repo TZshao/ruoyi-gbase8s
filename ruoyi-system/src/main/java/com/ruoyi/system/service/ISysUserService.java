@@ -106,6 +106,22 @@ public interface ISysUserService
     public void checkUserDataScope(Long userId);
 
     /**
+     * 查询用户数据权限信息
+     *
+     * @param userId 用户id
+     * @return 用户信息包含数据范围
+     */
+    public SysUser selectUserDataScope(Long userId);
+
+    /**
+     * 保存用户数据权限
+     *
+     * @param user 用户信息
+     * @return 结果
+     */
+    public int authUserDataScope(SysUser user);
+
+    /**
      * 新增用户信息
      * 
      * @param user 用户信息
