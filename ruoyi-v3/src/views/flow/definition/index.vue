@@ -19,6 +19,7 @@
       </el-col>
       <el-col :span="1.5">
         <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate" v-hasPermi="['flow:def:edit']">修改</el-button>
+        <el-button type="warning" plain icon="CopyDocument" :disabled="single" @click="handleIterateFromList" v-hasPermi="['flow:def:add']">版本迭代</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete" v-hasPermi="['flow:def:remove']">删除</el-button>
@@ -30,24 +31,33 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="流程名称" align="center" prop="flowName" />
       <el-table-column label="版本" align="center" prop="version" width="80" />
+      <el-table-column label="发布状态" align="center" prop="publish" width="100">
+        <template #default="scope">
+          <el-tag :type="scope.row.publish ? 'success' : 'info'">
+            {{ scope.row.publish ? '已发布' : '未发布' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createTime" width="170">
         <template #default="scope">
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="300">
+      <el-table-column label="配置" align="center" class-name="small-padding fixed-width" width="300">
         <template #default="scope">
-          <el-button link type="primary" icon="Setting" @click="openConfigStep(scope.row)" v-hasPermi="['flow:step:list']">配置流程</el-button>
+          <el-button link type="primary" icon="Setting" @click="openConfigStep(scope.row)" v-hasPermi="['flow:step:list']" :disabled="scope.row.publish">配置流程</el-button>
+          <el-button link type="primary" icon="Document" @click="openConfigForm(scope.row)" v-hasPermi="['flow:def:edit']" :disabled="scope.row.publish">配置表单结构</el-button>
         </template>
       </el-table-column>
-         <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="300">
+      <el-table-column label="动作" align="center" class-name="small-padding fixed-width" width="300">
         <template #default="scope">
-          <el-button link type="primary" icon="Document" @click="openConfigForm(scope.row)" v-hasPermi="['flow:def:edit']">配置表单结构</el-button>
+          <el-button link type="success" icon="Promotion" @click="handlePublish(scope.row)" v-hasPermi="['flow:def:edit']" :disabled="scope.row.publish">发布</el-button>
+              <el-button link type="warning" icon="CopyDocument" @click="openIterateDialog(scope.row)" v-hasPermi="['flow:def:add']">版本迭代</el-button>
         </template>
       </el-table-column>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="300">
+      <el-table-column label="查看" align="center" class-name="small-padding fixed-width" width="200">
         <template #default="scope">
-          <el-button link type="primary" icon="View" @click="openViewInstance(scope.row)" v-hasPermi="['flow:instance:list']">查看实例</el-button>
+          <el-button link type="primary" icon="View" @click="openViewInstanceByCode(scope.row)" v-hasPermi="['flow:instance:list']">查看实例</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -60,6 +70,11 @@
           <el-col :span="12">
             <el-form-item label="流程名称" prop="flowName">
               <el-input v-model="form.flowName" placeholder="请输入流程名称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="流程代码" prop="flowCode">
+              <el-input v-model="form.flowCode" placeholder="请输入流程代码" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -89,16 +104,27 @@
       </div>
       <el-table :data="stepList" v-loading="stepLoading" border height="420px">
         <el-table-column label="顺序" prop="orderNum" width="80" />
-        <el-table-column label="步骤编码" prop="stepCode" width="150" />
-        <el-table-column label="步骤名称" prop="stepName" />
-        <el-table-column label="通过后" prop="nextOnPass" width="140" />
-        <el-table-column label="拒绝后" prop="nextOnReject" width="140" />
-        <el-table-column label="处理人类型" prop="handlerType" width="120" />
+        <el-table-column label="名称">
+          <template #default="scope">
+            {{scope.row.stepName+' ('+scope.row.stepCode+')'}}
+          </template>
+        </el-table-column>
+        <el-table-column label="通过" prop="nextOnPass" width="140">
+          <template #default="scope">
+            {{ getStepNameByCode(scope.row.nextOnPass) || scope.row.nextOnPass || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="拒绝" prop="nextOnReject" width="140">
+          <template #default="scope">
+            {{ getStepNameByCode(scope.row.nextOnReject) || scope.row.nextOnReject || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="审批类型" prop="handlerType" width="120" />
         <el-table-column label="处理人值" prop="handlerValue" />
         <el-table-column label="操作" align="center" width="150">
           <template #default="scope">
-            <el-button link type="primary" icon="Edit" @click="handleEditStep(scope.row)" v-hasPermi="['flow:step:edit']">修改</el-button>
-            <el-button link type="danger" icon="Delete" @click="handleDeleteStep(scope.row)" v-hasPermi="['flow:step:remove']">删除</el-button>
+            <el-button link type="primary" :disabled="scope.row.stepCode==='CLOSED'" icon="Edit" @click="handleEditStep(scope.row)" v-hasPermi="['flow:step:edit']">修改</el-button>
+            <el-button link type="danger" :disabled="scope.row.stepCode==='CLOSED'" icon="Delete" @click="handleDeleteStep(scope.row)" v-hasPermi="['flow:step:remove']">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -114,13 +140,13 @@
       <el-form ref="stepFormRef" :model="stepForm" :rules="stepRules" label-width="100px">
         <el-row>
           <el-col :span="12">
-            <el-form-item label="步骤编码" prop="stepCode">
-              <el-input v-model="stepForm.stepCode" placeholder="请输入步骤编码" />
+            <el-form-item label="步骤名称" prop="stepName">
+              <el-input v-model="stepForm.stepName" placeholder="中文名称" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="步骤名称" prop="stepName">
-              <el-input v-model="stepForm.stepName" placeholder="请输入步骤名称" />
+            <el-form-item label="步骤编码" prop="stepCode">
+              <el-input v-model="stepForm.stepCode" placeholder="英文字符" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -201,9 +227,11 @@
           <template #title>字段仅在允许的步骤号内可编辑。</template>
         </el-alert>
         <el-table :data="formSchemaForm.fields" border style="width: 100%" height="420px">
-          <el-table-column label="启用步骤编码" width="180">
+          <el-table-column label="启用步骤" width="180">
             <template #default="scope">
-              <el-input v-model="scope.row.enableIn" placeholder="步骤编码，多个用逗号分隔" />
+              <el-select v-model="scope.row.enableIn" placeholder="请选择步骤" multiple filterable collapse-tags collapse-tags-tooltip style="width: 100%">
+                <el-option v-for="item in formStepOptions" :key="item.value" :label="item.label" :value="item.value" />
+              </el-select>
             </template>
           </el-table-column>
           <el-table-column label="字段名" width="150">
@@ -239,7 +267,7 @@
           </el-table-column>
           <el-table-column label="必填" width="100" align="center">
             <template #default="scope">
-              <el-switch v-model="scope.row.required" :active-value="true" :inactive-value="true"/>
+              <el-switch v-model="scope.row.required" :active-value="true" :inactive-value="false"/>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="100" align="center">
@@ -260,6 +288,43 @@
       </template>
     </el-dialog>
 
+    <!-- 版本迭代弹窗 -->
+    <el-dialog title="版本迭代" v-model="iterateDialogOpen" width="1000px" append-to-body align-center destroy-on-close>
+      <template #header>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span>版本迭代 - {{ currentFlowCode }}</span>
+          <el-button type="primary" icon="CopyDocument" @click="handleIterateNewVersion" v-hasPermi="['flow:def:add']" :disabled="!hasLatestPublished">迭代新版</el-button>
+        </div>
+      </template>
+      <el-table :data="versionList" v-loading="versionLoading" border>
+        <el-table-column label="版本" prop="version" width="100" align="center" />
+        <el-table-column label="发布状态" prop="publish" width="120" align="center">
+          <template #default="scope">
+            <el-tag :type="scope.row.publish ? 'success' : 'info'">
+              {{ scope.row.publish ? '已发布' : '未发布' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" prop="createTime" width="170" align="center">
+          <template #default="scope">
+            <span>{{ parseTime(scope.row.createTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="400">
+          <template #default="scope">
+            <el-button link type="primary" icon="Setting" @click="openConfigStep(scope.row)" v-hasPermi="['flow:step:list']">查看流程</el-button>
+            <el-button link type="primary" icon="View" @click="openViewInstanceByFlowId(scope.row)" v-hasPermi="['flow:instance:list']">查看实例</el-button>
+            <el-button link type="primary" icon="Document" @click="openConfigForm(scope.row)" v-hasPermi="['flow:def:edit']">查看表单</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="iterateDialogOpen = false">关 闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <!-- 查看实例弹窗 -->
     <el-dialog title="查看实例" v-model="instanceDialogOpen" width="1200px" append-to-body align-center destroy-on-close>
       <el-form :model="instanceQueryParams" ref="instanceQueryRef" :inline="true" class="mb10">
@@ -275,6 +340,8 @@
       </el-form>
       <el-table :data="instanceList" v-loading="instanceLoading" border>
         <el-table-column label="实例ID" prop="id" width="90" />
+        <el-table-column label="流程编号" prop="flowCode" width="150" />
+        <el-table-column label="流程版本" prop="flowVersion" width="100" />
         <el-table-column label="状态" prop="status" width="110">
           <template #default="scope">
             <dict-tag :options="statusOptions" :value="scope.row.status" />
@@ -304,7 +371,7 @@
 </template>
 
 <script setup name="FlowDefinition">
-import { listFlowDef, getFlowDef, addFlowDef, updateFlowDef, delFlowDef } from "@/api/flow/definition"
+import { listFlowDef, getFlowDef, addFlowDef, updateFlowDef, delFlowDef, publishFlowDef, iterateFlowDef, listFlowDefByFlowCode } from "@/api/flow/definition"
 import { listFlowStep, getFlowStep, addFlowStep, updateFlowStep, delFlowStep, listStepTriggers } from "@/api/flow/step"
 import { listInstance } from "@/api/flow/instance"
 import { useRouter } from "vue-router"
@@ -359,10 +426,18 @@ const eventPass = reactive({ cls: "", method: "" })
 const eventReject = reactive({ cls: "", method: "" })
 const stepOptions = computed(() => {
   const opts = (stepList.value || []).map(item => ({
-    label: `${item.stepCode} ${item.stepName || ""}`.trim(),
+    label: `${item.stepName || ""} (${item.stepCode})`.trim(),
     value: item.stepCode
   }))
-  return [{ label: "结束(close)", value: "close" }, ...opts]
+  return [...opts]
+})
+
+// 表单结构配置的步骤选项
+const formStepOptions = computed(() => {
+  return (formStepList.value || []).map(item => ({
+    label: `${item.stepName || ""} (${item.stepCode})`.trim(),
+    value: item.stepCode
+  }))
 })
 
 // 配置表单结构相关
@@ -371,18 +446,33 @@ const formSchemaForm = reactive({
   flowId: null,
   fields: []
 })
+const formStepList = ref([])
 
 function normalizeField(field = {}) {
+  // 处理enableIn字段：如果是字符串（逗号分隔），转换为数组；如果是数组，保持原样
+  let enableIn = field.enableIn || ""
+  if (typeof enableIn === "string" && enableIn.trim()) {
+    enableIn = enableIn.split(",").map(s => s.trim()).filter(s => s)
+  } else if (!Array.isArray(enableIn)) {
+    enableIn = []
+  }
   return {
-    enableIn: "",
     name: "",
     label: "",
     type: "string",
     required: true,
     visible: 1,
-    ...field
+    ...field,
+    enableIn: enableIn
   }
 }
+
+// 版本迭代相关
+const iterateDialogOpen = ref(false)
+const versionList = ref([])
+const versionLoading = ref(false)
+const currentFlowCode = ref("")
+const hasLatestPublished = ref(false)
 
 // 查看实例相关
 const instanceDialogOpen = ref(false)
@@ -393,6 +483,7 @@ const instanceQueryParams = reactive({
   pageNum: 1,
   pageSize: 10,
   flowId: null,
+  flowCode: null,
   status: undefined
 })
 const statusOptions = [
@@ -475,6 +566,10 @@ function handleUpdate(row) {
   reset()
   const id = row.id || ids.value
   getFlowDef(id).then(res => {
+    if (res.data.publish) {
+      proxy.$modal.msgError("已发布的流程不允许修改，请进行版本迭代")
+      return
+    }
     form.value = res.data
     open.value = true
     title.value = "修改流程"
@@ -489,6 +584,8 @@ function submitForm() {
         proxy.$modal.msgSuccess("修改成功")
         open.value = false
         getList()
+      }).catch(err => {
+        proxy.$modal.msgError(err.msg || "修改失败")
       })
     } else {
       addFlowDef(form.value).then(() => {
@@ -567,7 +664,10 @@ function computeNextOrder() {
   if (!Array.isArray(stepList.value) || stepList.value.length === 0) {
     return 1
   }
-  const maxOrder = Math.max(...stepList.value.map(item => Number(item.orderNum || 0)))
+  const maxOrder = Math.max(...stepList.value.map(item => {
+    var num = Number(item.orderNum || 0);
+    return num >= 99 ? 1 : num;
+  }));
   return Number.isFinite(maxOrder) ? maxOrder + 1 : 1
 }
 
@@ -623,7 +723,22 @@ function openConfigForm(row) {
   } catch (e) {
     formSchemaForm.fields = []
   }
+  // 加载该流程的步骤列表
+  loadFormStepList(row.id)
   formSchemaDialogOpen.value = true
+}
+
+function loadFormStepList(flowId) {
+  listFlowStep({ flowId: flowId, pageNum: 1, pageSize: 100 }).then(res => {
+    formStepList.value = res.rows || []
+  })
+}
+
+// 根据步骤码获取步骤名称
+function getStepNameByCode(stepCode) {
+  if (!stepCode) return ""
+  const step = stepList.value.find(item => item.stepCode === stepCode)
+  return step ? step.stepName : ""
 }
 
 function addField() {
@@ -635,7 +750,16 @@ function removeField(index) {
 }
 
 function submitFormSchema() {
-  const schema = { fields: formSchemaForm.fields.map(item => normalizeField(item)) }
+  // 将enableIn数组转换为逗号分隔的字符串保存
+  const schema = {
+    fields: formSchemaForm.fields.map(item => {
+      const field = normalizeField(item)
+      return {
+        ...field,
+        enableIn: Array.isArray(field.enableIn) ? field.enableIn.join(",") : (field.enableIn || "")
+      }
+    })
+  }
   getFlowDef(formSchemaForm.flowId).then(res => {
     const flowDef = res.data
     flowDef.formSchema = JSON.stringify(schema)
@@ -647,9 +771,59 @@ function submitFormSchema() {
   })
 }
 
-// 查看实例
-function openViewInstance(row) {
+// 版本迭代
+function openIterateDialog(row) {
+  currentFlowCode.value = row.flowCode
+  iterateDialogOpen.value = true
+  loadVersionList()
+}
+
+function loadVersionList() {
+  versionLoading.value = true
+  listFlowDefByFlowCode(currentFlowCode.value, false).then(res => {
+    versionList.value = (res.data || []).sort((a, b) => (b.version || 0) - (a.version || 0))
+    // 检查是否有最新已发布的版本
+    hasLatestPublished.value = versionList.value.length > 0 && versionList.value[0].publish
+    versionLoading.value = false
+  }).catch(() => {
+    versionLoading.value = false
+  })
+}
+
+function handleIterateNewVersion() {
+  if (versionList.value.length === 0) {
+    proxy.$modal.msgError("没有可迭代的版本")
+    return
+  }
+  const latestVersion = versionList.value[0]
+  if (!latestVersion.publish) {
+    proxy.$modal.msgError("最新版本未发布，无法迭代")
+    return
+  }
+  proxy.$modal.confirm("确认进行版本迭代吗？将创建新版本，流程编号不变，版本号+1。").then(() => {
+    iterateFlowDef(latestVersion.id).then(res => {
+      proxy.$modal.msgSuccess("版本迭代成功")
+      loadVersionList()
+      getList() // 刷新主列表
+    }).catch(err => {
+      proxy.$modal.msgError(err.msg || "版本迭代失败")
+    })
+  }).catch(() => {})
+}
+
+// 查看实例（按flowCode查看所有实例）
+function openViewInstanceByCode(row) {
+  instanceQueryParams.flowId = null
+  instanceQueryParams.flowCode = row.flowCode
+  instanceQueryParams.pageNum = 1
+  instanceDialogOpen.value = true
+  getInstanceList()
+}
+
+// 查看实例（按flowId查看特定版本的实例）
+function openViewInstanceByFlowId(row) {
   instanceQueryParams.flowId = row.id
+  instanceQueryParams.flowCode = null
   instanceQueryParams.pageNum = 1
   instanceDialogOpen.value = true
   getInstanceList()
@@ -672,6 +846,29 @@ function handleInstanceQuery() {
 function resetInstanceQuery() {
   instanceQueryParams.status = undefined
   handleInstanceQuery()
+}
+
+function handlePublish(row) {
+  proxy.$modal.confirm("确认发布该流程吗？发布后将无法修改，只能进行版本迭代。").then(() => {
+    publishFlowDef(row.id).then(() => {
+      proxy.$modal.msgSuccess("发布成功")
+      getList()
+    }).catch(err => {
+      proxy.$modal.msgError(err.msg || "发布失败")
+    })
+  }).catch(() => {})
+}
+
+function handleIterateFromList() {
+  const id = ids.value[0]
+  if (!id) {
+    proxy.$modal.msgError("请选择一条记录")
+    return
+  }
+  const row = dataList.value.find(item => item.id === id)
+  if (row) {
+    openIterateDialog(row)
+  }
 }
 
 getList()

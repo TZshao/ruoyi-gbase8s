@@ -8,6 +8,8 @@ create table flow_def (
                             flow_name        varchar(128)     default ''                 ,
                             form_schema      varchar(2000)    default ''                 ,
                             version          integer          default 1                  ,
+                            publish          boolean          default false              ,
+                            is_del           boolean          default false              ,
                             create_by        varchar(64)      default ''                 ,
                             create_time      DATETIME YEAR TO SECOND                     ,
                             update_by        varchar(64)      default ''                 ,
@@ -19,6 +21,8 @@ comment on column flow_def.flow_code is '流程编号';
 comment on column flow_def.flow_name is '流程名称';
 comment on column flow_def.form_schema is '表单Schema(JSON)';
 comment on column flow_def.version is '版本号';
+comment on column flow_def.publish is '是否已发布';
+comment on column flow_def.is_del is '是否删除';
 comment on column flow_def.create_by is '创建者';
 comment on column flow_def.create_time is '创建时间';
 comment on column flow_def.update_by is '更新者';
@@ -74,6 +78,8 @@ drop table if exists flow_instance;
 create table flow_instance (
                             id                 SERIAL8          not null  primary key   ,
                             flow_id            bigint           not null                  ,
+                            flow_code          varchar(64)      default ''                 ,
+                            flow_version       integer          default null               ,
                             applicant_id       bigint           default null              ,
                             status             varchar(20)      default 'RUNNING'         ,
                             current_step_code  varchar(64)      default ''                 ,
@@ -86,6 +92,8 @@ create table flow_instance (
 ) ;
 comment on column flow_instance.id is '主键';
 comment on column flow_instance.flow_id is '流程ID';
+comment on column flow_instance.flow_code is '流程编号（冗余）';
+comment on column flow_instance.flow_version is '流程版本（冗余）';
 comment on column flow_instance.applicant_id is '申请人用户ID';
 comment on column flow_instance.status is '状态 RUNNING/PASS/REJECT/CANCEL';
 comment on column flow_instance.current_step_code is '当前步骤编码';

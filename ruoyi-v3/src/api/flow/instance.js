@@ -35,6 +35,14 @@ export function updateInstance(data) {
   })
 }
 
+// 提交实例
+export function submitInstance(id) {
+  return request({
+    url: '/flow/instance/' + id + '/submit',
+    method: 'post'
+  })
+}
+
 // 删除实例
 export function delInstance(ids) {
   return request({

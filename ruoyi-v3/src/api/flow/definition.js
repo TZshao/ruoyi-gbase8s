@@ -43,3 +43,28 @@ export function delFlowDef(ids) {
   })
 }
 
+// 根据flowCode查询流程定义列表
+export function listFlowDefByFlowCode(flowCode, latestPublished = false) {
+  return request({
+    url: '/flow/definition/listByFlowCode',
+    method: 'get',
+    params: { flowCode, latestPublished }
+  })
+}
+
+// 发布流程
+export function publishFlowDef(id) {
+  return request({
+    url: '/flow/definition/publish/' + id,
+    method: 'post'
+  })
+}
+
+// 版本迭代
+export function iterateFlowDef(id) {
+  return request({
+    url: '/flow/definition/iterate/' + id,
+    method: 'post'
+  })
+}
+

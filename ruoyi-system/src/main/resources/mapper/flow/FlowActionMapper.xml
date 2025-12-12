@@ -8,14 +8,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <id     property="id"          column="id"/>
         <result property="instanceId"  column="instance_id"/>
         <result property="stepCode"    column="step_code"/>
-        <result property="action"      column="action"/>
+        <result property="pass"      column="pass"/>
         <result property="comment"     column="comment"/>
         <result property="operatorId"  column="operator_id"/>
         <result property="actionTime"  column="action_time"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, instance_id, step_code, action, comment, operator_id, action_time
+        id, instance_id, step_code, pass, comment, operator_id, action_time
     </sql>
 
     <select id="selectFlowActionById" parameterType="Long" resultMap="FlowActionResult">
@@ -28,8 +28,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="instanceId != null">
                 and instance_id = #{instanceId}
             </if>
-            <if test="action != null and action != ''">
-                and action = #{action}
+            <if test="pass != null and pass">
+                and pass
+            </if>
+            <if test="pass != null and !pass">
+                and not pass
             </if>
         </where>
         order by id desc
@@ -44,7 +47,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <trim suffixOverrides=",">
                 <if test="instanceId != null">instance_id,</if>
                 <if test="stepCode != null">step_code,</if>
-                <if test="action != null">action,</if>
+                <if test="pass != null">pass,</if>
                 <if test="comment != null">comment,</if>
                 <if test="operatorId != null">operator_id,</if>
                 <if test="actionTime != null">action_time,</if>
@@ -53,7 +56,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <trim suffixOverrides=",">
                 <if test="instanceId != null">#{instanceId},</if>
                 <if test="stepCode != null">#{stepCode},</if>
-                <if test="action != null">#{action},</if>
+                <if test="pass != null">#{pass},</if>
                 <if test="comment != null">#{comment},</if>
                 <if test="operatorId != null">#{operatorId},</if>
                 <if test="actionTime != null">#{actionTime},</if>

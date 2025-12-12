@@ -7,7 +7,9 @@ import com.hfits.system.workflow.domain.FlowAction;
 import com.hfits.system.workflow.domain.FlowInstance;
 import com.hfits.system.workflow.domain.FlowStatus;
 import com.hfits.system.workflow.domain.FlowStepDef;
+import com.hfits.system.workflow.domain.FlowDef;
 import com.ruoyi.system.mapper.FlowActionMapper;
+import com.ruoyi.system.mapper.FlowDefMapper;
 import com.ruoyi.system.mapper.FlowInstanceMapper;
 import com.ruoyi.system.mapper.FlowStepDefMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +19,9 @@ import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Locale;
 import java.util.List;
+
+import static com.hfits.system.workflow.service.FlowDefService.CLOSE_STEP_CODE;
 
 /**
  * 流程实例Service业务层处理
@@ -35,10 +38,10 @@ public class FlowInstanceService {
     private FlowStepDefMapper flowStepDefMapper;
 
     @Autowired
+    private FlowDefMapper flowDefMapper;
+
+    @Autowired
     private ApplicationContext applicationContext;
-
-    private static final String CLOSE_CODE = "close";
-
 
     public FlowInstance selectFlowInstanceById(Long id) {
         return flowInstanceMapper.selectFlowInstanceById(id);
@@ -51,21 +54,56 @@ public class FlowInstanceService {
 
 
     @Transactional(rollbackFor = Exception.class)
-    public int createInstance(FlowInstance flowInstance) {
-        String firstStep = flowStepDefMapper.selectFirstStepCode(flowInstance.getFlowId());
-        if (StringUtils.isEmpty(firstStep)) {
-            throw new ServiceException("流程未配置步骤，请先配置步骤");
+    public FlowInstance createInstance(FlowInstance flowInstance) {
+        // 获取流程定义信息，保存冗余字段
+        FlowDef flowDef = flowDefMapper.selectFlowDefById(flowInstance.getFlowId());
+        if (flowDef == null) {
+            throw new ServiceException("流程定义不存在");
         }
-        flowInstance.setStatus(FlowStatus.RUNNING.name());
-        flowInstance.setCurrentStepCode(firstStep);
+        flowInstance.setFlowCode(flowDef.getFlowCode());
+        flowInstance.setFlowVersion(flowDef.getVersion());
+
+        // 创建时状态为PENDING，步骤码为RISE，用户可以修改和提交
+        flowInstance.setStatus(FlowStatus.PENDING.name());
+        flowInstance.setCurrentStepCode("RISE");
         flowInstance.setCreateTime(DateUtils.getNowDate());
-        return flowInstanceMapper.insertFlowInstance(flowInstance);
+        flowInstanceMapper.insertFlowInstance(flowInstance);
+        return flowInstance;
     }
 
 
     public int updateFlowInstance(FlowInstance flowInstance) {
+        // 只有PENDING状态的实例才能修改
+        if (flowInstance.getId() != null) {
+            FlowInstance existing = flowInstanceMapper.selectFlowInstanceById(flowInstance.getId());
+            if (existing != null && !FlowStatus.PENDING.name().equalsIgnoreCase(existing.getStatus())) {
+                throw new ServiceException("只有待提交状态的流程实例才能修改");
+            }
+        }
         flowInstance.setUpdateTime(DateUtils.getNowDate());
         return flowInstanceMapper.updateFlowInstance(flowInstance);
+    }
+
+    /**
+     * 提交流程实例，将PENDING状态转为RUNNING，步骤码从RISE转为第一步
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public int submitInstance(Long instanceId) {
+        FlowInstance instance = flowInstanceMapper.selectFlowInstanceById(instanceId);
+        if (instance == null) {
+            throw new ServiceException("流程实例不存在");
+        }
+        if (!FlowStatus.PENDING.name().equalsIgnoreCase(instance.getStatus())) {
+            throw new ServiceException("只有待提交状态的流程实例才能提交");
+        }
+
+        // 获取第一步步骤码
+        FlowStepDef currentStep = flowStepDefMapper.selectByFlowIdAndCode(instance.getFlowId(), instance.getCurrentStepCode());
+        // 更新状态为RUNNING，步骤码转为第一步
+        instance.setStatus(FlowStatus.RUNNING.name());
+        instance.setCurrentStepCode(currentStep.getNextOnPass());
+        instance.setUpdateTime(DateUtils.getNowDate());
+        return flowInstanceMapper.updateFlowInstance(instance);
     }
 
 
@@ -85,21 +123,22 @@ public class FlowInstanceService {
         if (instance == null) {
             throw new ServiceException("流程实例不存在");
         }
-        if (!FlowStatus.CLOSED.name().equalsIgnoreCase(instance.getStatus())) {
-            throw new ServiceException("流程已结束或不可审批");
+        // 只有RUNNING状态的实例才能审批
+        if (!FlowStatus.RUNNING.name().equalsIgnoreCase(instance.getStatus())) {
+            throw new ServiceException("只有运行中的流程实例才能审批");
         }
         FlowStepDef currentStep = flowStepDefMapper.selectByFlowIdAndCode(instance.getFlowId(), instance.getCurrentStepCode());
         if (currentStep == null) {
             throw new ServiceException("当前步骤配置缺失");
         }
 
-        String nextCode = "PASS".equalsIgnoreCase(action.getAction()) ? currentStep.getNextOnPass() : currentStep.getNextOnReject();
+        String nextCode = Boolean.TRUE.equals(action.getPass()) ? currentStep.getNextOnPass() : currentStep.getNextOnReject();
 
         String newStatus;
         String newStep;
-        boolean isClose = StringUtils.isNotEmpty(nextCode) && CLOSE_CODE.equalsIgnoreCase(nextCode.trim());
+        boolean isClose = CLOSE_STEP_CODE.equalsIgnoreCase(StringUtils.trim(nextCode));
         if (isClose) {
-            newStatus = CLOSE_CODE;
+            newStatus = FlowStatus.CLOSED.name();
             newStep = instance.getCurrentStepCode();
         } else {
             newStatus = FlowStatus.RUNNING.name();
@@ -116,7 +155,7 @@ public class FlowInstanceService {
         flowInstanceMapper.updateFlowInstance(instance);
 
         // 触发事件
-        String eventKey = "PASS".equalsIgnoreCase(action.getAction()) ? currentStep.getEventOnPass() : currentStep.getEventOnReject();
+        String eventKey = Boolean.TRUE.equals(action.getPass()) ? currentStep.getEventOnPass() : currentStep.getEventOnReject();
         invokeEvent(eventKey, instance);
         return 1;
     }

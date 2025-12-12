@@ -7,6 +7,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="com.hfits.system.workflow.domain.FlowInstance" id="FlowInstanceResult">
         <id     property="id"               column="id"/>
         <result property="flowId"           column="flow_id"/>
+        <result property="flowCode"         column="flow_code"/>
+        <result property="flowVersion"      column="flow_version"/>
         <result property="applicantId"      column="applicant_id"/>
         <result property="status"           column="status"/>
         <result property="currentStepCode"  column="current_step_code"/>
@@ -16,14 +18,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="updateBy"         column="update_by"/>
         <result property="updateTime"       column="update_time"/>
         <result property="remark"           column="remark"/>
-        <result property="flowCode"         column="flow_code"/>
         <result property="flowName"         column="flow_name"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        fi.id, fi.flow_id, fi.applicant_id, fi.status, fi.current_step_code, fi.form_data,
+        fi.id, fi.flow_id, fi.flow_code, fi.flow_version, fi.applicant_id, fi.status, fi.current_step_code, fi.form_data,
         fi.create_by, fi.create_time, fi.update_by, fi.update_time, fi.remark,
-        fd.flow_code, fd.flow_name
+        fd.flow_name
     </sql>
 
     <select id="selectFlowInstanceById" parameterType="Long" resultMap="FlowInstanceResult">
@@ -41,6 +42,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="flowId != null">
                 and fi.flow_id = #{flowId}
             </if>
+            <if test="flowCode != null and flowCode != ''">
+                and fi.flow_code = #{flowCode}
+            </if>
             <if test="status != null and status != ''">
                 and fi.status = #{status}
             </if>
@@ -55,6 +59,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         insert into flow_instance(
             <trim suffixOverrides=",">
                 <if test="flowId != null">flow_id,</if>
+                <if test="flowCode != null">flow_code,</if>
+                <if test="flowVersion != null">flow_version,</if>
                 <if test="applicantId != null">applicant_id,</if>
                 <if test="status != null">status,</if>
                 <if test="currentStepCode != null">current_step_code,</if>
@@ -66,6 +72,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ) values(
             <trim suffixOverrides=",">
                 <if test="flowId != null">#{flowId},</if>
+                <if test="flowCode != null">#{flowCode},</if>
+                <if test="flowVersion != null">#{flowVersion},</if>
                 <if test="applicantId != null">#{applicantId},</if>
                 <if test="status != null">#{status},</if>
                 <if test="currentStepCode != null">#{currentStepCode},</if>
@@ -81,6 +89,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         update flow_instance
         <set>
             <if test="flowId != null">flow_id = #{flowId},</if>
+            <if test="flowCode != null">flow_code = #{flowCode},</if>
+            <if test="flowVersion != null">flow_version = #{flowVersion},</if>
             <if test="applicantId != null">applicant_id = #{applicantId},</if>
             <if test="status != null">status = #{status},</if>
             <if test="currentStepCode != null">current_step_code = #{currentStepCode},</if>

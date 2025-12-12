@@ -9,94 +9,97 @@ import com.ruoyi.common.core.domain.BaseEntity;
 /**
  * 流程定义
  */
-public class FlowDef extends BaseEntity
-{
+public class FlowDef extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     private Long id;
 
-    @Size(max = 64, message = "流程编号不能超过64个字符")
+    @NotBlank(message = "流程码不能为空")
     private String flowCode;
 
-    @NotBlank(message = "流程名称不能为空")
-    @Size(max = 128, message = "流程名称不能超过128个字符")
+    @NotBlank(message = "流程名不能为空")
     private String flowName;
 
-    /** JSON schema 字符串 */
+    /**
+     * JSON schema 字符串
+     */
     private String formSchema;
 
-    /** 版本号 */
+    /**
+     * 版本号
+     */
     private Integer version;
 
-    private Integer publishStat;
+    private Boolean publish;
 
-    public Integer getPublishStat() {
-        return publishStat;
+    private Boolean isDel = false;
+
+    public Boolean isPublish() {
+        return publish;
     }
 
-    public void setPublishStat(Integer publishStat) {
-        this.publishStat = publishStat;
+    public void setPublish(Boolean publish) {
+        this.publish = publish;
     }
 
-    public Long getId()
-    {
+    public boolean isDel() {
+        return isDel;
+    }
+
+    public void setDel(boolean del) {
+        isDel = del;
+    }
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(Long id)
-    {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public String getFlowCode()
-    {
+    public String getFlowCode() {
         return flowCode;
     }
 
-    public void setFlowCode(String flowCode)
-    {
+    public void setFlowCode(String flowCode) {
         this.flowCode = flowCode;
     }
 
-    public String getFlowName()
-    {
+    public String getFlowName() {
         return flowName;
     }
 
-    public void setFlowName(String flowName)
-    {
+    public void setFlowName(String flowName) {
         this.flowName = flowName;
     }
 
-    public String getFormSchema()
-    {
+    public String getFormSchema() {
         return formSchema;
     }
 
-    public void setFormSchema(String formSchema)
-    {
+    public void setFormSchema(String formSchema) {
         this.formSchema = formSchema;
     }
 
-    public Integer getVersion()
-    {
+    public Integer getVersion() {
         return version;
     }
 
-    public void setVersion(Integer version)
-    {
+    public void setVersion(Integer version) {
         this.version = version;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
                 .append("id", getId())
                 .append("flowCode", getFlowCode())
                 .append("flowName", getFlowName())
                 .append("formSchema", getFormSchema())
                 .append("version", getVersion())
+                .append("publish", isPublish())
+                .append("isDel", isDel())
                 .append("createBy", getCreateBy())
                 .append("createTime", getCreateTime())
                 .append("updateBy", getUpdateBy())

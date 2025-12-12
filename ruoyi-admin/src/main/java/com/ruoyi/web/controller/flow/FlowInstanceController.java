@@ -3,9 +3,11 @@ package com.ruoyi.web.controller.flow;
 import com.hfits.system.workflow.domain.FlowAction;
 import com.hfits.system.workflow.domain.FlowInstance;
 import com.hfits.system.workflow.service.FlowInstanceService;
-import com.ruoyi.common.annotation.log.Log;
+import com.ruoyi.common.annotation.log.PostMappingLog;
+import com.ruoyi.common.annotation.log.DeleteMappingLog;
+import com.ruoyi.common.annotation.log.PutMappingLog;
 import com.ruoyi.common.core.controller.BaseController;
-import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,15 +22,13 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/flow/instance")
-public class FlowInstanceController extends BaseController
-{
+public class FlowInstanceController extends BaseController {
     @Autowired
     private FlowInstanceService flowInstanceService;
 
     @PreAuthorize("@ss.hasPermi('flow:instance:list')")
     @GetMapping("/list")
-    public TableDataInfo list(FlowInstance flowInstance)
-    {
+    public TableDataInfo list(FlowInstance flowInstance) {
         startPage();
         List<FlowInstance> list = flowInstanceService.selectFlowInstanceList(flowInstance);
         return getDataTable(list);
@@ -36,53 +36,50 @@ public class FlowInstanceController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('flow:instance:query')")
     @GetMapping("/{id}")
-    public AjaxResult getInfo(@PathVariable Long id)
-    {
-        return success(flowInstanceService.selectFlowInstanceById(id));
+    public R<FlowInstance> getInfo(@PathVariable Long id) {
+        return successR(flowInstanceService.selectFlowInstanceById(id));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:instance:add')")
-    @Log(title = "流程实例", businessType = BusinessType.INSERT)
-    @PostMapping("/start")
-    public AjaxResult start(@Validated @RequestBody FlowInstance flowInstance)
-    {
+    @PostMappingLog(value="start",title = "发起流程", businessType = BusinessType.INSERT)
+    public R<FlowInstance> start(@Validated @RequestBody FlowInstance flowInstance) {
         flowInstance.setApplicantId(getUserId());
         flowInstance.setCreateBy(getUsername());
-        return toAjax(flowInstanceService.createInstance(flowInstance));
+        FlowInstance instance = flowInstanceService.createInstance(flowInstance);
+        return successR(instance);
     }
 
     @PreAuthorize("@ss.hasPermi('flow:instance:edit')")
-    @Log(title = "流程实例", businessType = BusinessType.UPDATE)
-    @PutMapping
-    public AjaxResult edit(@RequestBody FlowInstance flowInstance)
-    {
+    @PostMappingLog(value = "/{id}/submit", title = "提交流程实例", businessType = BusinessType.UPDATE)
+    public R<?> submit(@PathVariable Long id) {
+        return toAjaxR(flowInstanceService.submitInstance(id));
+    }
+
+    @PreAuthorize("@ss.hasPermi('flow:instance:edit')")
+    @PutMappingLog(title = "修改流程实例", businessType = BusinessType.UPDATE)
+    public R<?> edit(@RequestBody FlowInstance flowInstance) {
         flowInstance.setUpdateBy(getUsername());
-        return toAjax(flowInstanceService.updateFlowInstance(flowInstance));
+        return toAjaxR(flowInstanceService.updateFlowInstance(flowInstance));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:instance:remove')")
-    @Log(title = "流程实例", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
-    {
-        return toAjax(flowInstanceService.deleteFlowInstanceByIds(ids));
+    @DeleteMappingLog(value = "/{ids}", title = "流程实例", businessType = BusinessType.DELETE)
+    public R<?> remove(@PathVariable Long[] ids) {
+        return toAjaxR(flowInstanceService.deleteFlowInstanceByIds(ids));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:instance:action')")
-    @Log(title = "流程审批", businessType = BusinessType.UPDATE)
-    @PostMapping("/{id}/action")
-    public AjaxResult action(@PathVariable Long id, @Validated @RequestBody FlowAction flowAction)
-    {
+    @PostMappingLog(value = "/{id}/action", title = "流程审批", businessType = BusinessType.UPDATE)
+    public R<?> action(@PathVariable Long id, @Validated @RequestBody FlowAction flowAction) {
         flowAction.setInstanceId(id);
         flowAction.setOperatorId(getUserId());
-        return toAjax(flowInstanceService.handleAction(flowAction));
+        return toAjaxR(flowInstanceService.handleAction(flowAction));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:instance:query')")
     @GetMapping("/{id}/actions")
-    public AjaxResult actionList(@PathVariable Long id)
-    {
-        return success(flowInstanceService.listActions(id));
+    public R<List<FlowAction>> actionList(@PathVariable Long id) {
+        return successR(flowInstanceService.listActions(id));
     }
 }
 

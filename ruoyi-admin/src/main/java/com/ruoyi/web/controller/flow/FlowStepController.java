@@ -4,7 +4,7 @@ import com.hfits.system.workflow.domain.FlowStepDef;
 import com.hfits.system.workflow.service.FlowStepDefService;
 import com.ruoyi.common.annotation.log.Log;
 import com.ruoyi.common.core.controller.BaseController;
-import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 流程步骤配置
@@ -26,9 +27,9 @@ public class FlowStepController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('flow:step:list')")
     @GetMapping("/triggers")
-    public AjaxResult triggerOptions()
+    public R<Map<String, List<String>>> triggerOptions()
     {
-        return success(flowStepDefService.listAvailableEvents());
+        return successR(flowStepDefService.listAvailableEvents());
     }
 
     @PreAuthorize("@ss.hasPermi('flow:step:list')")
@@ -42,35 +43,35 @@ public class FlowStepController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('flow:step:query')")
     @GetMapping("/{id}")
-    public AjaxResult getInfo(@PathVariable Long id)
+    public R<FlowStepDef> getInfo(@PathVariable Long id)
     {
-        return success(flowStepDefService.selectFlowStepDefById(id));
+        return successR(flowStepDefService.selectFlowStepDefById(id));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:step:add')")
     @Log(title = "流程步骤", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@Validated @RequestBody FlowStepDef flowStepDef)
+    public R<?> add(@Validated @RequestBody FlowStepDef flowStepDef)
     {
         flowStepDef.setCreateBy(getUsername());
-        return toAjax(flowStepDefService.insertFlowStepDef(flowStepDef));
+        return toAjaxR(flowStepDefService.insertFlowStepDef(flowStepDef));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:step:edit')")
     @Log(title = "流程步骤", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@Validated @RequestBody FlowStepDef flowStepDef)
+    public R<?> edit(@Validated @RequestBody FlowStepDef flowStepDef)
     {
         flowStepDef.setUpdateBy(getUsername());
-        return toAjax(flowStepDefService.updateFlowStepDef(flowStepDef));
+        return toAjaxR(flowStepDefService.updateFlowStepDef(flowStepDef));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:step:remove')")
     @Log(title = "流程步骤", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
+    public R<?> remove(@PathVariable Long[] ids)
     {
-        return toAjax(flowStepDefService.deleteFlowStepDefByIds(ids));
+        return toAjaxR(flowStepDefService.deleteFlowStepDefByIds(ids));
     }
 }
 

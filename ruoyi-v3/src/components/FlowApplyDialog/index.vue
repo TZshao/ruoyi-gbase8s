@@ -45,9 +45,10 @@
 <script setup name="FlowApplyDialog">
 import { computed, ref, watch } from "vue"
 import { getFlowDef } from "@/api/flow/definition"
-import { getInstance, startInstance, updateInstance } from "@/api/flow/instance"
+import { getInstance, startInstance, updateInstance, submitInstance } from "@/api/flow/instance"
 import { listFlowStep } from "@/api/flow/step"
 import FlowFrom from "@/components/FlowFrom"
+import { ElMessage } from "element-plus"
 
 const props = defineProps({
   modelValue: {
@@ -70,6 +71,8 @@ const formData = ref({})
 const stepList = ref([])
 const currentStepCode = ref("RISE")
 const resolvedFlowId = ref()
+const resolvedInstanceId = ref()
+const instanceStatus = ref("")
 const loading = ref(false)
 const saving = ref(false)
 
@@ -100,9 +103,13 @@ async function initData() {
       const res = await getInstance(props.instanceId)
       const instance = res.data || {}
       flowId = instance.flowId
+      resolvedInstanceId.value = instance.id
+      instanceStatus.value = instance.status || ""
       currentStepCode.value = instance.currentStepCode || "RISE"
       formData.value = safeParse(instance.formData)
     } else {
+      resolvedInstanceId.value = null
+      instanceStatus.value = ""
       currentStepCode.value = "RISE"
       formData.value = {}
     }
@@ -153,14 +160,14 @@ async function validateForm() {
 }
 
 async function handleSave() {
-  await submitInstance(false)
+  await saveOrUpdateInstance(false)
 }
 
 async function handleSubmit() {
-  await submitInstance(true)
+  await saveOrUpdateInstance(true)
 }
 
-async function submitInstance(closeAfter) {
+async function saveOrUpdateInstance(isSubmit) {
   await validateForm()
   if (!resolvedFlowId.value) return
   saving.value = true
@@ -169,17 +176,45 @@ async function submitInstance(closeAfter) {
       flowId: resolvedFlowId.value,
       formData: JSON.stringify(formData.value || {})
     }
-    if (props.instanceId) {
-      payload.id = props.instanceId
+    
+    if (resolvedInstanceId.value) {
+      // 更新已存在的实例
+      payload.id = resolvedInstanceId.value
       await updateInstance(payload)
-      emit("saved")
+      
+      // 如果是提交操作，调用提交接口
+      if (isSubmit) {
+        await submitInstance(resolvedInstanceId.value)
+        ElMessage.success("提交成功")
+        emit("submitted")
+        handleClose()
+      } else {
+        ElMessage.success("暂存成功")
+        emit("saved")
+      }
     } else {
-      await startInstance(payload)
-      emit(closeAfter ? "submitted" : "saved")
+      // 创建新实例
+      const res = await startInstance(payload)
+      const instance = res.data
+      const newInstanceId = instance?.id
+      
+      // 如果是提交操作，调用提交接口
+      if (isSubmit && newInstanceId) {
+        await submitInstance(newInstanceId)
+        ElMessage.success("提交成功")
+        emit("submitted")
+        handleClose()
+      } else {
+        ElMessage.success("暂存成功")
+        emit("saved")
+        // 更新实例ID，以便下次可以继续编辑
+        if (newInstanceId) {
+          resolvedInstanceId.value = newInstanceId
+        }
+      }
     }
-    if (closeAfter) {
-      handleClose()
-    }
+  } catch (error) {
+    ElMessage.error(error.message || "操作失败")
   } finally {
     saving.value = false
   }

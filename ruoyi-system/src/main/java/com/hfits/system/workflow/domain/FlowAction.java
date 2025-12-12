@@ -22,8 +22,8 @@ public class FlowAction extends BaseEntity
     /** 动作发生的步骤 */
     private String stepCode;
 
-    /** PASS / REJECT  */
-    private String action;
+    /** true=通过 / false=拒绝  */
+    private Boolean pass;
 
     /** 审批意见 */
     private String comment;
@@ -63,14 +63,14 @@ public class FlowAction extends BaseEntity
         this.stepCode = stepCode;
     }
 
-    public String getAction()
+    public Boolean getPass()
     {
-        return action;
+        return pass;
     }
 
-    public void setAction(String action)
+    public void setPass(Boolean pass)
     {
-        this.action = action;
+        this.pass = pass;
     }
 
     public String getComment()
@@ -110,7 +110,7 @@ public class FlowAction extends BaseEntity
                 .append("id", getId())
                 .append("instanceId", getInstanceId())
                 .append("stepCode", getStepCode())
-                .append("action", getAction())
+                .append("action", getPass())
                 .append("comment", getComment())
                 .append("operatorId", getOperatorId())
                 .append("actionTime", getActionTime())

@@ -165,14 +165,14 @@ async function validateForm() {
 }
 
 async function handlePass() {
-  await submitAction("PASS")
+  await submitAction(true)
 }
 
 async function handleReject() {
-  await submitAction("REJECT")
+  await submitAction(false)
 }
 
-async function submitAction(action) {
+async function submitAction(pass) {
   await validateForm()
   const targetId = instanceId.value || props.instanceId
   if (!targetId) {
@@ -181,8 +181,8 @@ async function submitAction(action) {
   }
   actionLoading.value = true
   try {
-    await approveInstance(targetId, { instanceId: targetId, action, comment: comment.value })
-    emit("approved", { action })
+    await approveInstance(targetId, { instanceId: targetId, pass, comment: comment.value })
+    emit("approved", { pass })
     handleClose()
   } finally {
     actionLoading.value = false

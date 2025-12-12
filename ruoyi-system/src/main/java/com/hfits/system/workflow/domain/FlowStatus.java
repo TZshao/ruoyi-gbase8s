@@ -5,8 +5,8 @@ package com.hfits.system.workflow.domain;
  */
 public enum FlowStatus
 {
-    PENDING,
-    RUNNING,
-    CLOSED
+    PENDING,//暂存
+    RUNNING,//流转中
+    CLOSED //关闭
 }
 

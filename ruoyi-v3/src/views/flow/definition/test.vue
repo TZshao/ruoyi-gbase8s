@@ -59,7 +59,22 @@
             @pagination="getInstanceList"
           />
           <div class="mt10">
-            <el-button type="primary" icon="View" :disabled="!selectedInstanceId" @click="openApprove">审批</el-button>
+            <el-button
+              type="warning"
+              icon="Edit"
+              :disabled="!selectedInstanceId || selectedInstance?.status !== 'PENDING'"
+              @click="openEdit"
+            >
+              编辑
+            </el-button>
+            <el-button
+              type="primary"
+              icon="View"
+              :disabled="!selectedInstanceId || selectedInstance?.status !== 'RUNNING'"
+              @click="openApprove"
+            >
+              审批
+            </el-button>
           </div>
         </el-card>
       </el-col>
@@ -68,6 +83,7 @@
     <FlowApplyDialog
       v-model="applyVisible"
       :flow-id="selectedFlowId"
+      :instance-id="editingInstanceId"
       @saved="getInstanceList"
       @submitted="getInstanceList"
     />
@@ -100,15 +116,16 @@ const instanceList = ref([])
 const instanceTotal = ref(0)
 const instanceLoading = ref(false)
 const selectedInstanceId = ref()
+const selectedInstance = ref(null)
+const editingInstanceId = ref(null)
 
 const applyVisible = ref(false)
 const approveVisible = ref(false)
 
 const statusOptions = [
-  { label: "运行中", value: "RUNNING" },
-  { label: "通过", value: "PASS" },
-  { label: "驳回", value: "REJECT" },
-  { label: "取消", value: "CANCEL" }
+  { label: "待提交", value: "PENDING", elTagType: "default" },
+  { label: "运行中", value: "RUNNING", elTagType: "primary" },
+  { label: "已关闭", value: "CLOSED", elTagType: "info" }
 ]
 
 onMounted(() => {
@@ -143,9 +160,17 @@ function resetInstanceQuery() {
 
 function handleInstanceSelect(row) {
   selectedInstanceId.value = row?.id
+  selectedInstance.value = row
 }
 
 function openApply() {
+  editingInstanceId.value = null
+  applyVisible.value = true
+}
+
+function openEdit() {
+  if (!selectedInstanceId.value) return
+  editingInstanceId.value = selectedInstanceId.value
   applyVisible.value = true
 }
 
