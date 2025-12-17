@@ -85,6 +85,7 @@ create table flow_instance (
                             applicant_id       bigint           default null              ,
                             status             varchar(20)      default 'RUNNING'         ,
                             current_step_code  varchar(64)      default ''                 ,
+                            current_step_handler varchar(64)      default ''                 ,
                             form_data          varchar(2000)    default ''                 ,
                             create_by          varchar(64)      default ''                 ,
                             create_time        DATETIME YEAR TO SECOND                     ,
@@ -101,6 +102,7 @@ comment on column flow_instance.flow_version is '流程版本（冗余）';
 comment on column flow_instance.applicant_id is '申请人用户ID';
 comment on column flow_instance.status is '状态 RUNNING/PASS/REJECT/CANCEL';
 comment on column flow_instance.current_step_code is '当前步骤编码';
+comment on column flow_instance.current_step_handler is '当前步骤审批人';
 comment on column flow_instance.form_data is '业务表单数据(JSON)';
 comment on column flow_instance.create_by is '创建者';
 comment on column flow_instance.create_time is '创建时间';

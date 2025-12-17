@@ -27,10 +27,11 @@ public class TestTrigger implements FlowTrigger {
     private void aaa(String s) {
         String ss = "";
         for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < 5; j++) {
                 ss += s;
             }
-            System.out.println(ss);
+            ss += "\n";
         }
+        System.out.println(ss);
     }
 }

@@ -36,7 +36,7 @@ public class FlowStepDefService {
     public void init() {
         // 获取所有FlowTrigger类型的bean名称
         String[] beanNames = applicationContext.getBeanNamesForType(FlowTrigger.class);
-        
+
         for (String beanName : beanNames) {
             FlowTrigger trigger = applicationContext.getBean(beanName, FlowTrigger.class);
             Class<?> clazz = trigger.getClass();
@@ -57,7 +57,7 @@ public class FlowStepDefService {
     }
 
     public FlowStepDef selectFlowStepDefById(Long id) {
-        return flowStepDefMapper.selectFlowStepDefById(id);
+        return flowStepDefMapper.selectById(id);
     }
 
 

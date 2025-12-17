@@ -4,7 +4,7 @@ import com.hfits.system.workflow.domain.FlowStepDef;
 import com.hfits.system.workflow.service.FlowStepDefService;
 import com.ruoyi.common.annotation.log.Log;
 import com.ruoyi.common.core.controller.BaseController;
-import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.domain.Resp;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class FlowStepController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('flow:step:list')")
     @GetMapping("/triggers")
-    public R<Map<String, List<String>>> triggerOptions()
+    public Resp<Map<String, List<String>>> triggerOptions()
     {
         return successR(flowStepDefService.listAvailableEvents());
     }
@@ -43,7 +43,7 @@ public class FlowStepController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('flow:step:query')")
     @GetMapping("/{id}")
-    public R<FlowStepDef> getInfo(@PathVariable Long id)
+    public Resp<FlowStepDef> getInfo(@PathVariable Long id)
     {
         return successR(flowStepDefService.selectFlowStepDefById(id));
     }
@@ -51,7 +51,7 @@ public class FlowStepController extends BaseController
     @PreAuthorize("@ss.hasPermi('flow:step:add')")
     @Log(title = "流程步骤", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<?> add(@Validated @RequestBody FlowStepDef flowStepDef)
+    public Resp<Integer> add(@Validated @RequestBody FlowStepDef flowStepDef)
     {
         flowStepDef.setCreateBy(getUsername());
         return toAjaxR(flowStepDefService.insertFlowStepDef(flowStepDef));
@@ -60,7 +60,7 @@ public class FlowStepController extends BaseController
     @PreAuthorize("@ss.hasPermi('flow:step:edit')")
     @Log(title = "流程步骤", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<?> edit(@Validated @RequestBody FlowStepDef flowStepDef)
+    public Resp<Integer> edit(@Validated @RequestBody FlowStepDef flowStepDef)
     {
         flowStepDef.setUpdateBy(getUsername());
         return toAjaxR(flowStepDefService.updateFlowStepDef(flowStepDef));
@@ -69,7 +69,7 @@ public class FlowStepController extends BaseController
     @PreAuthorize("@ss.hasPermi('flow:step:remove')")
     @Log(title = "流程步骤", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
-    public R<?> remove(@PathVariable Long[] ids)
+    public Resp<Integer> remove(@PathVariable Long[] ids)
     {
         return toAjaxR(flowStepDefService.deleteFlowStepDefByIds(ids));
     }

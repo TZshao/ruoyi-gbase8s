@@ -101,11 +101,13 @@ public class FlowInstanceService {
             throw new ServiceException("只有待提交状态的流程实例才能提交");
         }
 
-        // 获取第一步步骤码
-        FlowStepDef currentStep = flowStepDefMapper.selectByFlowIdAndCode(instance.getFlowId(), instance.getCurrentStepCode());
+        // 获取第下一步骤
+        FlowStepDef nextStep = flowStepDefMapper.selectNextStep(instance.getFlowId(), instance.getCurrentStepCode());
+
         // 更新状态为RUNNING，步骤码转为第一步
         instance.setStatus(FlowStatus.RUNNING.name());
-        instance.setCurrentStepCode(currentStep.getNextOnPass());
+        instance.setCurrentStepCode(nextStep.getStepCode());
+        instance.setCurrentStepHandler(nextStep.getHandlerValue());
         instance.setUpdateTime(DateUtils.getNowDate());
         return flowInstanceMapper.updateFlowInstance(instance);
     }
@@ -131,30 +133,27 @@ public class FlowInstanceService {
         if (!FlowStatus.RUNNING.name().equalsIgnoreCase(instance.getStatus())) {
             throw new ServiceException("只有运行中的流程实例才能审批");
         }
-        FlowStepDef currentStep = flowStepDefMapper.selectByFlowIdAndCode(instance.getFlowId(), instance.getCurrentStepCode());
-        if (currentStep == null) {
-            throw new ServiceException("当前步骤配置缺失");
-        }
 
-        String nextCode = Boolean.TRUE.equals(action.getPass()) ? currentStep.getNextOnPass() : currentStep.getNextOnReject();
+        FlowStepDef currentStep = flowStepDefMapper.selectByFlowIdAndCode(instance.getFlowId(), instance.getCurrentStepCode());
+        FlowStepDef nextStep = flowStepDefMapper.selectNextStep(instance.getFlowId(), instance.getCurrentStepCode());
 
         String newStatus;
-        String newStep;
-        boolean isClose = CLOSE_STEP_CODE.equalsIgnoreCase(StringUtils.trim(nextCode));
+        boolean isClose = CLOSE_STEP_CODE.equalsIgnoreCase(StringUtils.trim(nextStep.getStepCode()));
         if (isClose) {
             newStatus = FlowStatus.CLOSED.name();
-            newStep = instance.getCurrentStepCode();
         } else {
             newStatus = FlowStatus.RUNNING.name();
-            newStep = StringUtils.isBlank(nextCode) ? instance.getCurrentStepCode() : nextCode;
         }
 
+        //审批记录
         action.setStepCode(instance.getCurrentStepCode());
         action.setActionTime(DateUtils.getNowDate());
         flowActionMapper.insertFlowAction(action);
-
+        //更新实例
         instance.setStatus(newStatus);
-        instance.setCurrentStepCode(newStep);
+        instance.setCurrentStepCode(nextStep.getStepCode());
+        instance.setCurrentStepHandler(nextStep.getHandlerValue());
+
         // 如果审批时提供了表单数据，则更新实例的表单数据
         if (StringUtils.isNotBlank(action.getFormData())) {
             instance.setFormData(action.getFormData());
@@ -174,7 +173,7 @@ public class FlowInstanceService {
     }
 
     /**
-     * 调用 tigger 包下的事件
+     * 调用 tiggerInterface 的事件
      */
     private void invokeEvent(String eventKey, FlowInstance instance) {
         if (StringUtils.isBlank(eventKey)) {
@@ -182,7 +181,7 @@ public class FlowInstanceService {
         }
         String[] parts = eventKey.split("\\.");
         if (parts.length != 2) {
-            return;
+            throw new RuntimeException("引用名错误");
         }
         String beanName = parts[0];
         String methodName = parts[1];

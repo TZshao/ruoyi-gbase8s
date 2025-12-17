@@ -24,7 +24,7 @@
     <!-- 代码示例 -->
     <el-collapse v-model="activeCodeTab" class="code-example">
       <el-collapse-item name="code" title="📝 代码示例">
-        <pre><code>{{ codeExample }}</code></pre>
+        <highlightjs language="vue" :code="codeExample" />
       </el-collapse-item>
     </el-collapse>
 
@@ -138,18 +138,14 @@ function handleSubmitted() {
 .code-example {
   margin-top: 20px;
 }
-.code-example pre {
-  background: #f5f5f5;
+.code-example :deep(.hljs) {
   padding: 15px;
   border-radius: 4px;
   overflow-x: auto;
   margin: 0;
-}
-.code-example code {
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #333;
+  font-size: 14px;
+  line-height: 1.8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 }
 .mb10 {
   margin-bottom: 10px;

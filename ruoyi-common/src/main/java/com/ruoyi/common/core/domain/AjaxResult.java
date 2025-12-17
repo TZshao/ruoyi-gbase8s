@@ -11,6 +11,7 @@ import com.ruoyi.common.utils.StringUtils;
  * 正常消息响应请用 R<T> ,避免Mapper导致的类型不明确
  * @author ruoyi
  */
+@Deprecated
 public class AjaxResult extends HashMap<String, Object>
 {
     private static final long serialVersionUID = 1L;

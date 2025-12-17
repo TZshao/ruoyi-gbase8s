@@ -32,6 +32,8 @@ public class FlowInstance extends BaseEntity
 
     /** 当前步骤编码 */
     private String currentStepCode;
+    /** 当前步骤对应的审批人的值 （split数组：roleid/userid/deptCode）*/
+    private String currentStepHandler;
 
     /** 业务表单数据(JSON) */
     private String formData;
@@ -39,6 +41,14 @@ public class FlowInstance extends BaseEntity
     // 关联展示字段
     private String flowCode;
     private String flowName;
+
+    public String getCurrentStepHandler() {
+        return currentStepHandler;
+    }
+
+    public void setCurrentStepHandler(String currentStepHandler) {
+        this.currentStepHandler = currentStepHandler;
+    }
 
     public String getRefModule() {
         return refModule;

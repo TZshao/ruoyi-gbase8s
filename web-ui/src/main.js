@@ -7,6 +7,18 @@ import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import locale from 'element-plus/es/locale/lang/zh-cn'
 
+// highlight.js 代码高亮
+import hljsVuePlugin from '@highlightjs/vue-plugin'
+import hljs from 'highlight.js/lib/core'
+import xml from 'highlight.js/lib/languages/xml'
+import sql from 'highlight.js/lib/languages/sql'
+import 'highlight.js/styles/github-dark.css' // 选择一个主题样式
+
+// 注册语言（Vue 使用 xml 语言进行高亮）
+hljs.registerLanguage('vue', xml)
+hljs.registerLanguage('xml', xml)
+hljs.registerLanguage('sql', sql)
+
 import '@/assets/styles/index.scss' // global css
 
 import App from './App'
@@ -70,6 +82,7 @@ app.use(router)
 app.use(store)
 app.use(plugins)
 app.use(elementIcons)
+app.use(hljsVuePlugin) // 注册 highlight.js 插件
 app.component('svg-icon', SvgIcon)
 
 directive(app)

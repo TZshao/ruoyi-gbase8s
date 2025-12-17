@@ -2,7 +2,6 @@ package com.ruoyi.web.controller.flow;
 
 import java.util.List;
 
-import com.ruoyi.common.core.domain.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -15,12 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hfits.system.workflow.domain.FlowDef;
 import com.hfits.system.workflow.service.FlowDefService;
-import com.ruoyi.common.annotation.log.DeleteMappingLog;
 import com.ruoyi.common.annotation.log.Module;
 import com.ruoyi.common.annotation.log.PostMappingLog;
 import com.ruoyi.common.annotation.log.PutMappingLog;
 import com.ruoyi.common.core.controller.BaseController;
-import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.domain.Resp;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 
@@ -44,44 +42,40 @@ public class FlowDefinitionController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('flow:def:query')")
     @GetMapping("/listByFlowCode")
-    public R<List<FlowDef>> listByFlowCode(@RequestParam String flowCode, @RequestParam(required = false, defaultValue = "false") boolean latestPublished) {
+    public Resp<List<FlowDef>> listByFlowCode(@RequestParam String flowCode, @RequestParam(required = false, defaultValue = "false") boolean latestPublished) {
         List<FlowDef> list = flowDefService.listByFlowCode(flowCode, latestPublished);
         return successR(list);
     }
 
     @PreAuthorize("@ss.hasPermi('flow:def:query')")
     @GetMapping("/{id}")
-    public R<FlowDef> getInfo(@PathVariable Long id) {
+    public Resp<FlowDef> getInfo(@PathVariable Long id) {
         return successR(flowDefService.selectFlowDefById(id));
     }
 
-
-
     @PreAuthorize("@ss.hasPermi('flow:def:add')")
     @PostMappingLog(title = "流程定义", businessType = BusinessType.INSERT)
-    public R<?> add(@Validated @RequestBody FlowDef flowDef)
-    {
+    public Resp<?> add(@Validated @RequestBody FlowDef flowDef) {
         flowDef.setCreateBy(getUsername());
         return toAjaxR(flowDefService.insertFlowDef(flowDef));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:def:edit')")
     @PutMappingLog(title = "流程修改", businessType = BusinessType.UPDATE)
-    public R<?> edit(@Validated @RequestBody FlowDef flowDef) {
+    public Resp<?> edit(@Validated @RequestBody FlowDef flowDef) {
         flowDef.setUpdateBy(getUsername());
         return toAjaxR(flowDefService.updateFlowDef(flowDef));
     }
 
-
     @PreAuthorize("@ss.hasPermi('flow:def:edit')")
-    @PostMappingLog(value = "/publish/{id}",title = "流程发布", businessType = BusinessType.UPDATE)
-    public R<?> publish(@PathVariable Long id) {
+    @PostMappingLog(value = "/publish/{id}", title = "流程发布", businessType = BusinessType.UPDATE)
+    public Resp<?> publish(@PathVariable Long id) {
         return toAjaxR(flowDefService.publishFlowDef(id));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:def:add')")
-    @PostMappingLog(value = "/iterate/{id}",title = "流程迭代", businessType = BusinessType.INSERT)
-    public R<Long> iterate(@PathVariable Long id) {
+    @PostMappingLog(value = "/iterate/{id}", title = "流程迭代", businessType = BusinessType.INSERT)
+    public Resp<Long> iterate(@PathVariable Long id) {
         Long newId = flowDefService.iterateFlowDefVersion(id, getUsername());
         return successR(newId);
     }

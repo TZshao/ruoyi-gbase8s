@@ -4,7 +4,8 @@ import java.beans.PropertyEditorSupport;
 import java.util.Date;
 import java.util.List;
 
-import com.ruoyi.common.core.domain.R;
+import com.ruoyi.common.core.domain.Resp;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.WebDataBinder;
@@ -86,57 +87,57 @@ public class BaseController {
     /**
      * 返回成功
      */
-    protected <T> R<T> successR() {
-        return R.ok();
+    protected <T> Resp<T> successR() {
+        return Resp.ok();
     }
 
     /**
      * 返回成功消息
      */
-    protected <T> R<T> successR(String message) {
-        return R.ok(null, message);
+    protected <T> Resp<T> successR(String message) {
+        return Resp.ok(null, message);
     }
 
     /**
      * 返回成功数据
      */
-    protected <T> R<T> successR(T data) {
-        return R.ok(data);
+    protected <T> Resp<T> successR(T data) {
+        return Resp.ok(data);
     }
 
     /**
      * 返回成功数据和消息
      */
-    protected <T> R<T> successR(T data, String message) {
-        return R.ok(data, message);
+    protected <T> Resp<T> successR(T data, String message) {
+        return Resp.ok(data, message);
     }
 
     /**
      * 返回失败
      */
-    protected <T> R<T> errorR() {
-        return R.fail();
+    protected <T> Resp<T> errorR() {
+        return Resp.fail();
     }
 
     /**
      * 返回失败消息
      */
-    protected <T> R<T> errorR(String message) {
-        return R.fail(message);
+    protected <T> Resp<T> errorR(String message) {
+        return Resp.fail(message);
     }
 
     /**
      * 返回失败数据和消息
      */
-    protected <T> R<T> errorR(T data, String message) {
-        return R.fail(data, message);
+    protected <T> Resp<T> errorR(T data, String message) {
+        return Resp.fail(data, message);
     }
 
     /**
      * 返回失败，带状态码和消息
      */
-    protected <T> R<T> errorR(int code, String message) {
-        return R.fail(code, message);
+    protected <T> Resp<T> errorR(int code, String message) {
+        return Resp.fail(code, message);
     }
 
     /**
@@ -145,8 +146,8 @@ public class BaseController {
      * @param rows 影响行数
      * @return 操作结果
      */
-    protected <T> R<T> toAjaxR(int rows) {
-        return rows > 0 ? R.ok() : R.fail();
+    protected <T> Resp<T> toAjaxR(int rows) {
+        return rows > 0 ? Resp.ok() : Resp.fail();
     }
 
     /**
@@ -155,8 +156,8 @@ public class BaseController {
      * @param result 结果
      * @return 操作结果
      */
-    protected <T> R<T> toAjaxR(boolean result) {
-        return result ? R.ok() : R.fail();
+    protected <T> Resp<T> toAjaxR(boolean result) {
+        return result ? Resp.ok() : Resp.fail();
     }
 
     /**
@@ -247,6 +248,12 @@ public class BaseController {
      */
     public LoginUser getLoginUser() {
         return SecurityUtils.getLoginUser();
+    }
+    /**
+     * 获取用户缓存信息
+     */
+    public SysUser getUser() {
+        return SecurityUtils.getLoginUser().getUser();
     }
 
     /**

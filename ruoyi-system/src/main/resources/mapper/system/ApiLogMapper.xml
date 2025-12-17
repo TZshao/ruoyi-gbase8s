@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ApiLogMapper">
+
+	<resultMap type="apiLog" id="apiLog">
+		<id     property="id"            column="id"            />
+		<result property="apiKey"        column="api_key"       />
+		<result property="httpMethod"    column="http_method"   />
+		<result property="requestUri"    column="request_uri"   />
+		<result property="responseTime"  column="response_time" />
+		<result property="status"        column="status"        />
+		<result property="errorMsg"      column="error_msg"     />
+		<result property="createTime"    column="create_time"   />
+	</resultMap>
+	<resultMap type="ApiStatis" id="ApiStatis">
+		<id     property="apiKey"        column="api_key"       />
+		<result property="totalCount"    column="total_count"   />
+		<result property="avgResponseTime" column="avg_response_time" />
+		<result property="lastCallTime"  column="last_call_time" />
+		<result property="recent100AvgResponseTime" column="recent100_avg_response_time" />
+		<result property="errorCount"    column="error_count"   />
+	</resultMap>
+
+
+	<sql id="selectApiLog">
+        select id, api_key, http_method, request_uri, response_time, status, error_msg, create_time
+        from api_log
+    </sql>
+
+	<insert id="insertApiLog" parameterType="apiLog">
+		insert into api_log(api_key, http_method, request_uri, response_time, status, error_msg, create_time)
+		values (#{apiKey}, #{httpMethod}, #{requestUri}, #{responseTime}, #{status}, #{errorMsg}, now())
+	</insert>
+
+	<select id="selectApiLogList" parameterType="String" resultMap="apiLog">
+		select response_time,create_time from api_log
+		where api_key = #{apiKey}
+		order by create_time desc
+		<if test="limit != null and limit != 0">
+		 limit #{limit}
+		</if>
+	</select>
+
+	<delete id="deleteOldLog">
+		delete from api_log
+		where id not in (
+			select id from (
+				select id
+				from api_log
+				order by create_time desc
+				limit #{keepCount}
+			) t
+		)
+	</delete>
+	<delete id="cleanErrors">
+		delete from api_log where status = '1'
+	</delete>
+
+
+	<select id="selectStatis" resultMap="ApiStatis">
+		select
+			api_key,
+			count(*) as total_count,
+			avg(response_time) as avg_response_time,
+			max(create_time) as last_call_time,
+			(select avg(response_time)
+			 from (select response_time
+			       from api_log t2
+			       where t2.api_key = api_log.api_key
+			       order by t2.create_time desc
+			       limit 100) t) as recent100_avg_response_time,
+			sum(case when status = '1' then 1 else 0 end) as error_count
+		from api_log
+		group by api_key
+		order by total_count desc
+	</select>
+
+	<select id="selectStatisAfter" resultMap="ApiStatis">
+		select
+			api_key,
+			count(*) as total_count
+		from api_log
+		where create_time &gt; #{date}
+		group by api_key
+		order by total_count desc
+	</select>
+
+	<select id="selectErrorApiList" resultMap="ApiStatis">
+		select
+			api_key,
+			count(*) as error_count
+		from api_log
+		where status = '1'
+		group by api_key
+		order by error_count desc
+	</select>
+
+</mapper>
+

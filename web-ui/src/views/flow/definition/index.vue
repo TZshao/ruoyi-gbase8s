@@ -98,7 +98,7 @@
     </el-dialog>
 
     <!-- 配置流程步骤弹窗 -->
-    <el-dialog title="配置流程" v-model="stepDialogOpen" width="1400px" append-to-body align-center destroy-on-close>
+    <el-dialog title="配置流程" v-model="stepDialogOpen" width="1200px" append-to-body align-center destroy-on-close>
       <div class="mb10">
         <el-button type="primary" plain icon="Plus" @click="handleAddStep" v-hasPermi="['flow:step:add']">新增步骤</el-button>
       </div>
@@ -122,7 +122,6 @@
         </el-table-column>
         <el-table-column label="拒绝事件" prop="eventOnReject" width="140"/>
         <el-table-column label="审批类型" prop="handlerType" width="120" />
-        <el-table-column label="处理人值" prop="handlerValue" />
         <el-table-column label="操作" align="center" width="150">
           <template #default="scope">
             <el-button link type="primary" :disabled="scope.row.stepCode==='CLOSED'" icon="Edit" @click="handleEditStep(scope.row)" v-hasPermi="['flow:step:edit']">修改</el-button>
@@ -167,12 +166,56 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="审批类型" prop="handlerType">
-              <el-input v-model="stepForm.handlerType" placeholder="等权限控制完善后实现" />
+              <el-select v-model="stepForm.handlerType" placeholder="请选择审批类型" clearable style="width: 100%" @change="handleHandlerTypeChange">
+                <el-option label="角色" value="ROLE" />
+                <el-option label="部门" value="DEPT" />
+                <el-option label="特定用户" value="USER" />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="审批人" prop="handlerValue">
-              <el-input v-model="stepForm.handlerValue" placeholder="等权限控制完善后实现" />
+              <!-- 角色多选 -->
+              <el-select
+                v-if="stepForm.handlerType === 'ROLE'"
+                v-model="stepForm.handlerValue"
+                multiple
+                placeholder="请选择角色"
+                filterable
+                collapse-tags
+                collapse-tags-tooltip
+                style="width: 100%"
+              >
+                <el-option v-for="item in roleOptions" :key="item.roleId" :label="item.roleName" :value="item.roleId" :disabled="item.status == 1" />
+              </el-select>
+              <!-- 部门树多选 -->
+              <el-tree-select
+                v-else-if="stepForm.handlerType === 'DEPT'"
+                v-model="stepForm.handlerValue"
+                :data="enabledDeptOptions"
+                :props="{ value: 'code', label: 'label', children: 'children' }"
+                value-key="code"
+                multiple
+                placeholder="请选择部门"
+                clearable
+                check-strictly
+                style="width: 100%"
+              />
+              <!-- 用户多选 -->
+              <el-select
+                v-else-if="stepForm.handlerType === 'USER'"
+                v-model="stepForm.handlerValue"
+                multiple
+                placeholder="请选择用户"
+                filterable
+                collapse-tags
+                collapse-tags-tooltip
+                style="width: 100%"
+              >
+                <el-option v-for="item in userOptions" :key="item.userId" :label="item.nickName + '(' + item.userName + ')'" :value="item.userId" />
+              </el-select>
+              <!-- 未选择审批类型时的提示 -->
+              <el-input v-else v-model="stepForm.handlerValue" placeholder="请先选择审批类型" disabled />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -269,20 +312,20 @@
               </el-table-column>
               <el-table-column label="字典类型" width="180" v-if="hasSelectField">
                 <template #default="scope">
-                  <el-select 
+                  <el-select
                     v-if="scope.row.type === 'select'"
-                    v-model="scope.row.dictType" 
-                    placeholder="请选择字典类型" 
-                    style="width: 100%" 
+                    v-model="scope.row.dictType"
+                    placeholder="请选择字典类型"
+                    style="width: 100%"
                     filterable
                     clearable
                     :disabled="isCustomPageEnabled"
                   >
-                    <el-option 
-                      v-for="item in dictTypeOptions" 
-                      :key="item.dictType" 
-                      :label="item.dictName" 
-                      :value="item.dictType" 
+                    <el-option
+                      v-for="item in dictTypeOptions"
+                      :key="item.dictType"
+                      :label="item.dictName"
+                      :value="item.dictType"
                     />
                   </el-select>
                   <span v-else style="color: #909399;">-</span>
@@ -413,6 +456,7 @@ import { listFlowDef, getFlowDef, addFlowDef, updateFlowDef, delFlowDef, publish
 import { listFlowStep, getFlowStep, addFlowStep, updateFlowStep, delFlowStep, listStepTriggers } from "@/api/flow/step"
 import { listInstance } from "@/api/flow/instance"
 import { optionselect } from "@/api/system/dict/type"
+import { getUser, deptTreeSelect, listUser } from "@/api/system/user"
 import { useRouter } from "vue-router"
 
 const router = useRouter()
@@ -470,6 +514,57 @@ const stepOptions = computed(() => {
   }))
   return [...opts]
 })
+
+// 审批类型和审批人相关
+const roleOptions = ref([])
+const userOptions = ref([])
+const enabledDeptOptions = ref([])
+
+// 过滤禁用的部门
+function filterDisabledDept(deptList) {
+  return deptList.filter(dept => {
+    if (dept.disabled) {
+      return false
+    }
+    if (dept.children && dept.children.length) {
+      dept.children = filterDisabledDept(dept.children)
+    }
+    return true
+  })
+}
+
+// 加载角色选项
+function loadRoleOptions() {
+  getUser().then(response => {
+    roleOptions.value = response.roles || []
+  }).catch(() => {
+    roleOptions.value = []
+  })
+}
+
+// 加载用户选项
+function loadUserOptions() {
+  listUser({ pageNum: 1, pageSize: 1000, status: "0" }).then(response => {
+    userOptions.value = response.rows || []
+  }).catch(() => {
+    userOptions.value = []
+  })
+}
+
+// 加载部门树选项
+function loadDeptOptions() {
+  deptTreeSelect().then(response => {
+    enabledDeptOptions.value = filterDisabledDept(JSON.parse(JSON.stringify(response.data || [])))
+  }).catch(() => {
+    enabledDeptOptions.value = []
+  })
+}
+
+// 审批类型变化处理
+function handleHandlerTypeChange() {
+  // 清空审批人选择
+  stepForm.handlerValue = []
+}
 
 // 表单结构配置的步骤选项
 const formStepOptions = computed(() => {
@@ -705,7 +800,7 @@ function handleAddStep() {
   stepForm.nextOnPass = ""
   stepForm.nextOnReject = ""
   stepForm.handlerType = ""
-  stepForm.handlerValue = ""
+  stepForm.handlerValue = []
   stepForm.eventOnPass = ""
   stepForm.eventOnReject = ""
   eventPass.cls = ""
@@ -713,6 +808,10 @@ function handleAddStep() {
   eventReject.cls = ""
   eventReject.method = ""
   stepForm.orderNum = computeNextOrder()
+  // 加载选项数据
+  loadRoleOptions()
+  loadUserOptions()
+  loadDeptOptions()
   stepTitle.value = "新增步骤"
   stepFormOpen.value = true
 }
@@ -737,6 +836,26 @@ function handleEditStep(row) {
     eventPass.method = pMethod || ""
     eventReject.cls = rCls || ""
     eventReject.method = rMethod || ""
+    // 将字符串转换为数组（后端返回的是字符串）//不做转换，selecter 的Key的类型会对不上，导致不能回显
+    if (stepForm.handlerValue && typeof stepForm.handlerValue === 'string') {
+      const values = stepForm.handlerValue.split(',').filter(v => v)
+      if (stepForm.handlerType === 'DEPT') {
+        // 部门类型：保持字符串（deptCode）
+        stepForm.handlerValue = values
+      } else {
+        // 角色和用户类型：转换为数字（ID）
+        stepForm.handlerValue = values.map(v => {
+          const num = Number(v)
+          return isNaN(num) ? v : num
+        })
+      }
+    } else if (!stepForm.handlerValue) {
+      stepForm.handlerValue = []
+    }
+    // 加载选项数据
+    loadRoleOptions()
+    loadUserOptions()
+    loadDeptOptions()
     stepTitle.value = "修改步骤"
     stepFormOpen.value = true
   })
@@ -746,16 +865,21 @@ function submitStepForm() {
   // 组合事件
   stepForm.eventOnPass = eventPass.cls && eventPass.method ? `${eventPass.cls}.${eventPass.method}` : ""
   stepForm.eventOnReject = eventReject.cls && eventReject.method ? `${eventReject.cls}.${eventReject.method}` : ""
+  // 将数组转换为字符串（后端接受字符串）
+  const submitData = { ...stepForm }
+  if (Array.isArray(submitData.handlerValue)) {
+    submitData.handlerValue = submitData.handlerValue.join(',')
+  }
   proxy.$refs["stepFormRef"].validate(valid => {
     if (!valid) return
     if (stepForm.id) {
-      updateFlowStep(stepForm).then(() => {
+      updateFlowStep(submitData).then(() => {
         proxy.$modal.msgSuccess("修改成功")
         stepFormOpen.value = false
         getStepList()
       })
     } else {
-      addFlowStep(stepForm).then(() => {
+      addFlowStep(submitData).then(() => {
         proxy.$modal.msgSuccess("新增成功")
         stepFormOpen.value = false
         getStepList()

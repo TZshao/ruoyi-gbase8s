@@ -27,13 +27,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         id, flow_id, step_code, step_name, next_on_pass, next_on_reject, handler_type, handler_value, event_on_pass, event_on_reject, order_num, create_by, create_time, update_by, update_time, remark
     </sql>
 
-    <select id="selectFlowStepDefById" parameterType="Long" resultMap="FlowStepDefResult">
+    <select id="selectById" parameterType="Long" resultMap="FlowStepDefResult">
         select <include refid="Base_Column_List"/> from flow_step_def where id = #{id}
     </select>
 
     <select id="selectByFlowIdAndCode" resultMap="FlowStepDefResult">
         select <include refid="Base_Column_List"/> from flow_step_def where flow_id = #{flowId} and step_code = #{stepCode}
     </select>
+
+    <select id="selectNextStep" resultType="com.hfits.system.workflow.domain.FlowStepDef">
+        select t2.<include refid="Base_Column_List"/>
+        from flow_step_def t1
+            join flow_step_def t2
+                on t2.step_code = t1.nextOnPass and t2.flow_id = t1.flow_id
+        where t1.flow_id = #{flowId}
+        and t1.step_code = #{stepCode}
+    </select>
+
 
     <select id="selectFirstStepCode" parameterType="Long" resultType="String">
         select step_code from flow_step_def where flow_id = #{flowId} order by order_num asc limit 1
