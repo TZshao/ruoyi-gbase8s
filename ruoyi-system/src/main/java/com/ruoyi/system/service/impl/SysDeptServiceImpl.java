@@ -44,7 +44,7 @@ public class SysDeptServiceImpl implements ISysDeptService
      * @return 部门信息集合
      */
     @Override
-    @DataScope(tableAlias = "d", fieldGroup = FieldGroup.SYS_DEPT_CODE)
+    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE,selfFieldGroup = FieldGroup.REJECT)
     public List<SysDept> selectDeptList(SysDept dept) {
         return deptMapper.selectDeptList(dept);
     }
@@ -72,7 +72,7 @@ public class SysDeptServiceImpl implements ISysDeptService
     public List<SysDept> buildDeptTree(List<SysDept> depts)
     {
         List<SysDept> returnList = new ArrayList<SysDept>();
-        List<Long> tempList = depts.stream().map(SysDept::getDeptId).collect(Collectors.toList());
+        List<Long> tempList = depts.stream().map(SysDept::getDeptId).toList();
         for (SysDept dept : depts)
         {
             // 如果是顶级节点, 遍历该父节点的所有子节点
@@ -276,7 +276,7 @@ public class SysDeptServiceImpl implements ISysDeptService
         {
             child.setAncestors(child.getAncestors().replaceFirst(oldAncestors, newAncestors));
         }
-        if (children.size() > 0)
+        if (!children.isEmpty())
         {
             deptMapper.updateDeptChildren(children);
         }
@@ -334,6 +334,6 @@ public class SysDeptServiceImpl implements ISysDeptService
      */
     private boolean hasChild(List<SysDept> list, SysDept t)
     {
-        return getChildList(list, t).size() > 0;
+        return !getChildList(list, t).isEmpty();
     }
 }

@@ -23,14 +23,15 @@ public @interface DataScope {
      */
     public String tableAlias() default "";
 
-    /**
-     * 权限字符（用于多个角色匹配符合要求的权限）默认根据权限注解@ss获取，多个权限用逗号分隔开来
-     */
-    public String permission() default "";
+
+//    同一个接口，拥有部门级权限的人，是通过 DeptCode之类的过滤，
+//             但个人权限，是根据createUser之类的过滤，因此要配置两个
 
     /**
-     * 字段组（用于指定数据权限过滤的字段组，对应 FieldGroup 枚举名称）
-     * 可选值：COMMON_CASE, CASE1
+     * 部门权限字段组
      */
-    public FieldGroup fieldGroup();
+    public FieldGroup deptFieldGroup();
+
+    //个人权限字段组
+    public FieldGroup selfFieldGroup();
 }

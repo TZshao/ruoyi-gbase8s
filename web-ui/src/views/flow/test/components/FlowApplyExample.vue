@@ -32,6 +32,8 @@
     <FlowApplyDialog
       v-model="applyVisible"
       :flow-id="selectedFlowId"
+      :ref-id="projectId"
+      ref-module="演示模块"
       :instance-id="editingInstanceId"
       :initial-form-data="initialFormData"
       @saved="handleSaved"
@@ -46,6 +48,7 @@ import { listFlowDef } from "@/api/flow/definition.js"
 import FlowApplyDialog from "@/views/flow/flowApplyDialog/index.vue"
 import { ElMessage } from "element-plus"
 
+
 const flowOptions = ref([])
 const selectedFlowId = ref()
 const applyVisible = ref(false)
@@ -54,9 +57,9 @@ const activeCodeTab = ref([])
 
 // 初始表单数据，可以从外部传入（如项目ID等）
 const initialFormData = ref({
-  projectId: "PROJECT-001",
   projectName: "项目1"
 })
+const projectId=ref(111)
 
 const codeExample = ref(`<template>
   <div>
@@ -66,11 +69,13 @@ const codeExample = ref(`<template>
     <!-- 申请组件 -->
     <FlowApplyDialog
       v-model="applyVisible"
-      :flow-id="selectedFlowId"
-      :instance-id="editingInstanceId"
-      :initial-form-data="initialFormData"
-      @saved="handleSaved"
-      @submitted="handleSubmitted"
+      :flow-id="selectedFlowId"             新增流程id 与实例id二选一必填
+      :instance-id="editingInstanceId"      编辑实例id
+      :initial-form-data="initialFormData"  初始化表单，如项目名称，可为空
+      :ref-id="projectId"                   引用的业务表ID，一般都会有
+      :ref-module="name"                    模块名可不填
+      @saved="handleSaved"                  主键暂存后的回调，可不填
+      @submitted="handleSubmitted"          组件提交后的回调，如getList刷新
     />
   </div>
 </template>

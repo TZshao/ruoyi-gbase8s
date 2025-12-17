@@ -61,6 +61,12 @@ public class UserDetailsServiceImpl implements UserDetailsService
 
     public UserDetails createLoginUser(SysUser user)
     {
+        // 补充数据权限部门编码，避免后续再次查询
+        SysUser dataScopeUser = userService.selectUserDataScope(user.getUserId());
+        if (dataScopeUser != null && dataScopeUser.getAuthDeptCodes() != null)
+        {
+            user.setAuthDeptCodes(dataScopeUser.getAuthDeptCodes());
+        }
         return new LoginUser(user.getUserId(), user.getDeptId(), user, permissionService.getMenuPermission(user));
     }
 }

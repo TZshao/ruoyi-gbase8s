@@ -77,6 +77,8 @@ comment on column flow_step_def.remark is '备注';
 drop table if exists flow_instance;
 create table flow_instance (
                             id                 SERIAL8          not null  primary key   ,
+                            ref_id             bigint           ,
+                            ref_module             varchar(64)           ,
                             flow_id            bigint           not null                  ,
                             flow_code          varchar(64)      default ''                 ,
                             flow_version       integer          default null               ,
@@ -92,6 +94,8 @@ create table flow_instance (
 ) ;
 comment on column flow_instance.id is '主键';
 comment on column flow_instance.flow_id is '流程ID';
+comment on column flow_instance.ref_id is '业务表的ID，用于筛选';
+comment on column flow_instance.ref_module is '业务模块名，用于筛选';
 comment on column flow_instance.flow_code is '流程编号（冗余）';
 comment on column flow_instance.flow_version is '流程版本（冗余）';
 comment on column flow_instance.applicant_id is '申请人用户ID';

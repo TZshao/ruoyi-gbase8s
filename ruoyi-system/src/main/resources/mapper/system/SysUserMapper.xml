@@ -41,6 +41,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="leader"    column="leader"      />
         <result property="status"    column="dept_status" />
     </resultMap>
+	<resultMap id="userDeptResult" type="sysUserDept">
+        <id     property="deptId"    column="dept_id"     />
+        <result property="userId"  column="user_id"   />
+        <result property="deptCode"  column="dept_code"   />
+    </resultMap>
 
     <resultMap id="RoleResult" type="SysRole">
         <id     property="roleId"       column="role_id"        />
@@ -52,9 +57,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
 	<sql id="selectUserVo">
-        select u.user_id, u.dept_id, u.dept_code, u.user_name, u.nick_name, u.email, u.avatar, u.phonenumber, u.password, u.sex, u.status, u.data_scope, u.dept_check_strictly, u.del_flag, u.login_ip, u.login_date, u.pwd_update_date, u.create_by, u.create_time, u.remark,
+        select u.user_id, u.dept_id, u.dept_code,u.user_name, u.nick_name, u.email, u.avatar,u.data_scope,
+               u.phonenumber, u.password, u.sex, u.status, u.data_scope, u.dept_check_strictly,
+               u.del_flag, u.login_ip, u.login_date, u.pwd_update_date, u.create_by, u.create_time, u.remark,
         d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.dept_code, d.order_num, d.leader, d.status as dept_status,
-        r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope, r.status as role_status
+        r.role_id, r.role_name, r.role_key, r.role_sort,  r.status as role_status
         from sys_user u
 		    left join sys_dept d on u.dept_id = d.dept_id
 		    left join sys_user_role ur on u.user_id = ur.user_id
@@ -231,7 +238,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         set data_scope = #{dataScope},
             dept_check_strictly = #{deptCheckStrictly},
             update_by = #{updateBy},
-            update_time = sysdate()
+            update_time = now()
         where user_id = #{userId}
     </update>
 
@@ -246,28 +253,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
 
-    <select id="selectUserDeptListByUserId" parameterType="Long" resultType="Long">
-        select dept_id from sys_user_dept where user_id = #{userId}
+    <select id="selectUserDeptCodesByUserId" parameterType="Long" resultType="String">
+        select dept_code from sys_user_dept where user_id = #{userId}
     </select>
 
-    <select id="selectDeptCodesByIds" resultType="String">
-        select dept_code from sys_dept where dept_id in
-        <foreach collection="deptIds" item="deptId" open="(" separator="," close=")">
-            #{deptId}
-        </foreach>
-    </select>
-
-    <select id="selectDeptIdsByCodes" resultType="Long">
-        select dept_id from sys_dept where dept_code in
+    <select id="selectDeptListByCodes" resultMap="userDeptResult">
+        select dept_id, dept_code from sys_dept where dept_code in
         <foreach collection="deptCodes" item="deptCode" open="(" separator="," close=")">
             #{deptCode}
         </foreach>
     </select>
 
     <insert id="batchUserDept" parameterType="java.util.List">
-        insert into sys_user_dept(user_id, dept_id) values
+        insert into sys_user_dept(user_id, dept_id, dept_code) values
         <foreach collection="list" item="item" index="index" separator=",">
-            (#{item.userId}, #{item.deptId})
+            (#{item.userId}, #{item.deptId}, #{item.deptCode})
         </foreach>
     </insert>
 

@@ -16,6 +16,12 @@ public class FlowInstance extends BaseEntity
 
     @NotNull(message = "流程ID不能为空")
     private Long flowId;
+
+    //相关业务表Id，具体是那张表要看是什么申请
+    private Long refId;
+    //发起申请的模块，冗余可不要
+    private String refModule;
+
     private Integer flowVersion;
 
     /** 申请人用户ID */
@@ -33,6 +39,22 @@ public class FlowInstance extends BaseEntity
     // 关联展示字段
     private String flowCode;
     private String flowName;
+
+    public String getRefModule() {
+        return refModule;
+    }
+
+    public void setRefModule(String refModule) {
+        this.refModule = refModule;
+    }
+
+    public Long getRefId() {
+        return refId;
+    }
+
+    public void setRefId(Long refId) {
+        this.refId = refId;
+    }
 
     public Integer getFlowVersion() {
         return flowVersion;

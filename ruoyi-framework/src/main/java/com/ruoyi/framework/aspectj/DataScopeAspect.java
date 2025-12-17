@@ -55,7 +55,11 @@ public class DataScopeAspect {
                 if (StringUtils.isNotNull(baseEntity)) {
                     // 获取表别名和字段组
                     String tableAlias = controllerDataScope.tableAlias();
-                    FieldGroup fieldGroup= controllerDataScope.fieldGroup();
+
+                    //个人权限，部门权限用的字段组不一样
+                    FieldGroup fieldGroup = AuthUtil.DATA_SCOPE_SELF.equals(currentUser.getDataScope()) ?
+                            controllerDataScope.selfFieldGroup() :
+                            controllerDataScope.deptFieldGroup();
 
                     // 使用 AuthUtil 应用数据权限
                     AuthUtil.apply(baseEntity, currentUser, tableAlias, fieldGroup);
@@ -76,7 +80,7 @@ public class DataScopeAspect {
                 baseEntity = (BaseEntity) param;
             }
         }
-        if (StringUtils.isNotNull(baseEntity) ) {
+        if (StringUtils.isNotNull(baseEntity)) {
             baseEntity.getParams().put(DATA_SCOPE, "");
         }
     }

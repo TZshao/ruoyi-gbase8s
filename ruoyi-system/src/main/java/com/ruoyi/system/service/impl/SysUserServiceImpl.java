@@ -75,7 +75,7 @@ public class SysUserServiceImpl implements ISysUserService {
      * @return 用户信息集合信息
      */
     @Override
-    @DataScope(tableAlias = "d", fieldGroup = FieldGroup.SYS_DEPT_CODE)
+    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE,selfFieldGroup = FieldGroup.REJECT)
     public List<SysUser> selectUserList(SysUser user) {
         return userMapper.selectUserList(user);
     }
@@ -87,7 +87,7 @@ public class SysUserServiceImpl implements ISysUserService {
      * @return 用户信息集合信息
      */
     @Override
-    @DataScope(tableAlias = "d", fieldGroup = FieldGroup.SYS_DEPT_CODE)
+    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE,selfFieldGroup = FieldGroup.REJECT)
     public List<SysUser> selectAllocatedList(SysUser user) {
         return userMapper.selectAllocatedList(user);
     }
@@ -99,7 +99,7 @@ public class SysUserServiceImpl implements ISysUserService {
      * @return 用户信息集合信息
      */
     @Override
-    @DataScope(tableAlias = "d", fieldGroup = FieldGroup.SYS_DEPT_CODE)
+    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE,selfFieldGroup = FieldGroup.REJECT)
     public List<SysUser> selectUnallocatedList(SysUser user) {
         return userMapper.selectUnallocatedList(user);
     }
@@ -138,12 +138,9 @@ public class SysUserServiceImpl implements ISysUserService {
         if (StringUtils.isNull(user)) {
             return null;
         }
-        List<Long> deptIds = userMapper.selectUserDeptListByUserId(userId);
-        if (!CollectionUtils.isEmpty(deptIds)) {
-            List<String> deptCodes = userMapper.selectDeptCodesByIds(deptIds);
-            if (!CollectionUtils.isEmpty(deptCodes)) {
-                user.setAuthDeptCodes(deptCodes.toArray(new String[deptCodes.size()]));
-            }
+        List<String> deptCodes = userMapper.selectUserDeptCodesByUserId(userId);
+        if (!CollectionUtils.isEmpty(deptCodes)) {
+            user.setAuthDeptCodes(deptCodes.toArray(new String[deptCodes.size()]));
         }
         return user;
     }
@@ -332,6 +329,7 @@ public class SysUserServiceImpl implements ISysUserService {
         userMapper.updateUserDataScope(user);
         userMapper.deleteUserDeptByUserId(user.getUserId());
         return insertUserDept(user);
+
     }
 
     /**
@@ -421,18 +419,12 @@ public class SysUserServiceImpl implements ISysUserService {
         int rows = 1;
         String[] authDeptCodes = user.getAuthDeptCodes();
         if (authDeptCodes != null && authDeptCodes.length > 0 && "2".equals(user.getDataScope())) {
-            List<Long> deptIds = userMapper.selectDeptIdsByCodes(authDeptCodes);
-            if (!CollectionUtils.isEmpty(deptIds)) {
-                List<SysUserDept> list = new ArrayList<SysUserDept>(deptIds.size());
-                for (Long deptId : deptIds) {
-                    SysUserDept ud = new SysUserDept();
-                    ud.setUserId(user.getUserId());
-                    ud.setDeptId(deptId);
-                    list.add(ud);
+            List<SysUserDept> deptList = userMapper.selectDeptListByCodes(authDeptCodes);
+            if (!CollectionUtils.isEmpty(deptList)) {
+                for (SysUserDept dept : deptList) {
+                    dept.setUserId(user.getUserId());
                 }
-                if (!list.isEmpty()) {
-                    rows = userMapper.batchUserDept(list);
-                }
+                rows = userMapper.batchUserDept(deptList);
             }
         }
         return rows;

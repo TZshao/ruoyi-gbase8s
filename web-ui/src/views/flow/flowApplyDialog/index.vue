@@ -46,14 +46,16 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  flowId: [Number, String],
-  instanceId: [Number, String],
+  flowId: [Number, String],     //新增时 要新增的流程
+  instanceId: [Number, String], //编辑时 要编辑的实例ID
+  refId:[Number,String], // 引用的业务表ID，如projectID，userId，用于联查，建议附带上
+  refModule:[String], // 当前模块名称，用于筛选，不需要可以不传
   title: {
     type: String,
     default: "发起申请"
   },
+
   // 初始表单数据，用于外部传入数据（如项目ID等）
-  // 这些数据会合并到表单数据中并保存，无需在表单配置中设置 visible=false 的隐藏字段
   // 如果需要在表单中显示但不允许编辑，可以在表单配置中添加字段并设置 enableIn=[]（不在任何步骤可编辑）
   initialFormData: {
     type: Object,
@@ -176,6 +178,8 @@ async function saveOrUpdateInstance(isSubmit) {
   try {
     const payload = {
       flowId: resolvedFlowId.value,
+      refId: props.refId,
+      refModule: props.refModule,
       formData: JSON.stringify(formData.value || {})
     }
 

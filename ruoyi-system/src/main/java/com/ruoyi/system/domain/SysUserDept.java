@@ -14,6 +14,9 @@ public class SysUserDept
     /** ����ID */
     private Long deptId;
 
+    /** 部门编码 */
+    private String deptCode;
+
     public Long getUserId()
     {
         return userId;
@@ -34,12 +37,23 @@ public class SysUserDept
         this.deptId = deptId;
     }
 
+    public String getDeptCode()
+    {
+        return deptCode;
+    }
+
+    public void setDeptCode(String deptCode)
+    {
+        this.deptCode = deptCode;
+    }
+
     @Override
     public String toString()
     {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
             .append("userId", getUserId())
             .append("deptId", getDeptId())
+            .append("deptCode", getDeptCode())
             .toString();
     }
 }

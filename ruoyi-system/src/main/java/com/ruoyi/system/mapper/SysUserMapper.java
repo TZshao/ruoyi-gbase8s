@@ -171,28 +171,20 @@ public interface SysUserMapper
     public int batchUserDept(List<SysUserDept> userDeptList);
 
     /**
-     * 查询用户已分配的部门ID集合
+     * 查询用户已分配的部门编码集合
      *
      * @param userId 用户ID
-     * @return 部门ID集合
+     * @return 部门编码集合
      */
-    public List<Long> selectUserDeptListByUserId(Long userId);
+    public List<String> selectUserDeptCodesByUserId(Long userId);
 
     /**
-     * 根据部门ID列表查询部门编码列表
-     *
-     * @param deptIds 部门ID列表
-     * @return 部门编码列表
-     */
-    public List<String> selectDeptCodesByIds(@Param("deptIds") List<Long> deptIds);
-
-    /**
-     * 根据部门编码列表查询部门ID列表
+     * 根据部门编码列表查询部门信息集合
      *
      * @param deptCodes 部门编码列表
-     * @return 部门ID列表
+     * @return 部门信息集合
      */
-    public List<Long> selectDeptIdsByCodes(@Param("deptCodes") String[] deptCodes);
+    public List<SysUserDept> selectDeptListByCodes(@Param("deptCodes") String[] deptCodes);
 
     /**
      * 更新用户数据范围字段

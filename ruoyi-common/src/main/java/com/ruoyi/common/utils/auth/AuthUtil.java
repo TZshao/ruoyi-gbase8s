@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 数据权限 SQL 构建工具
+ * 当前实现是基于 字段组 + 部门编码，判断字段组中某个字段是否 等于/匹配 编码
+ * <p>
+ * 不要让业务模型入侵权限模型：这里不应该出现，某个具体的表，或者具体的字段
  */
 public final class AuthUtil {
     private static final Logger logger = LoggerFactory.getLogger(AuthUtil.class);
@@ -20,13 +22,13 @@ public final class AuthUtil {
     //全部数据权限
     public static final String DATA_SCOPE_ALL = "1";
 
-    //自定数据权限
+    //自定部门数据权限
     public static final String DATA_SCOPE_CUSTOM = "2";
 
-    //部门数据权限
+    //本部门数据权限
     public static final String DATA_SCOPE_DEPT = "3";
 
-    //部门及以下数据权限
+    //本部门及以下数据权限
     public static final String DATA_SCOPE_DEPT_AND_CHILD = "4";
 
     //仅本人数据权限
@@ -36,10 +38,6 @@ public final class AuthUtil {
     private AuthUtil() {
     }
 
-    private static final String EXIST_SQL = """
-            exists (select 1 from jdb, zrdw where zrdw.jdid = jdb.id and jdb.xmid = {} and ({}))
-            """;
-
 
     /* ========================== 对外入口 ========================== */
 
@@ -48,7 +46,15 @@ public final class AuthUtil {
             return;
         }
 
-        String sql = build(user, tableAlias, fieldGroup);
+        String sql;
+        if (FieldGroup.REJECT.equals(fieldGroup)) {
+            sql = "1 = 0";
+        } else if (FieldGroup.PASS.equals(fieldGroup)) {
+            sql = " 1=1";
+        } else {
+            sql = build(user, tableAlias, fieldGroup);
+        }
+
         if (StringUtils.isNotBlank(sql)) {
             logger.debug("追加权限过滤sql: AND ({})", sql);
             entity.getParams().put(
@@ -74,26 +80,46 @@ public final class AuthUtil {
         String[] authDeptCodes = user.getAuthDeptCodes();
 
         return switch (scope) {
-            //结果类似 t.field1 = deptCode or t.field2 = deptCode or exist ...
             case DATA_SCOPE_DEPT -> //本人部门
                     buildByCodes(tableAlias, fields, deptCode, false);
 
-            //结果类似 t.field1 like deptCode% or t.field2 like deptCode% or exist ...
             case DATA_SCOPE_DEPT_AND_CHILD -> //本人及以下部门
                     buildByCodes(tableAlias, fields, deptCode, true);
 
-
-            //结果类似 t.field1 in (deptCode1,deptCode2..) or t.field2 in (deptCode1,deptCode2,deptCode3) or exist ...
             case DATA_SCOPE_CUSTOM -> //自定义
                     buildByCodes(tableAlias, fields, authDeptCodes, false);
 
             //本人数据  t.fields[0] = user.userName
             case DATA_SCOPE_SELF -> buildSelf(user, tableAlias, fields);
+            case DATA_SCOPE_ALL -> "";
             default -> "";
         };
     }
 
-    /* ========================== 核心：按 code 构建 ========================== */
+    /* ========================== 核心：按 (字段 + deptCode) 构建 ========================== */
+
+    /*
+     *  对每个字段，buildField构建出  t.field = deptCode(%) ，然后  joinOr，用 or 合并
+     *  如果是自定义范围，则是 t.field in (code...) 然后 joinOr
+     *
+     *  其中比较特殊的是 exist 子语句，但最终也是拼出一个条件
+     *
+     *  部门与子部权限，字段组【name，nickName，existxx】
+     *  结果类似：
+     *  t.name like 10010% or
+     *  t.nickName like 10010% or
+     *  exist (select 1 ... where xx like code%)
+     *
+     *
+     * */
+
+    /**
+     * @param tableAlias 表别名
+     * @param fields     字段列表
+     * @param codes      条件-部门编码
+     * @param fuzzy      通过模糊查子部门  = code / like code%
+     * @return
+     */
     private static String buildByCodes(String tableAlias, String[] fields, String[] codes, boolean fuzzy) {
 
         if (codes == null || codes.length == 0) {
@@ -104,8 +130,9 @@ public final class AuthUtil {
 
         for (String field : fields) {
             String cond;
-            if ("exist".equals(field)) {
-                cond = buildExist(tableAlias, codes, fuzzy);
+            // 检查是否为特殊字段（存在于 sqlMap 中）
+            if (FieldGroup.isSpecialField(field)) {
+                cond = buildExist(tableAlias, field, codes, fuzzy);
             } else {
                 cond = buildField(tableAlias, field, codes, fuzzy);
             }
@@ -142,9 +169,23 @@ public final class AuthUtil {
     }
 
     /* ========================== exist 子查询 ========================== */
-    private static String buildExist(String tableAlias, String[] codes, boolean fuzzy) {
 
-        String xmId = StringUtils.format("{}.id", tableAlias);
+    /**
+     * 构建 exist 子查询（部门范围模式）
+     *
+     * @param tableAlias 表别名
+     * @param field      字段代码
+     * @param codes      条件-部门编码数组/或者是用户名
+     * @param fuzzy      是否模糊匹配
+     * @return SQL 条件
+     */
+    private static String buildExist(String tableAlias, String field, String[] codes, boolean fuzzy) {
+        // 从 FieldGroup 获取 SQL 模板
+        String sqlTemplate = FieldGroup.getSqlTemplate(field);
+        if (StringUtils.isBlank(sqlTemplate)) {
+            return "";
+        }
+
         List<String> parts = new ArrayList<>();
 
         for (String code : codes) {
@@ -152,9 +193,8 @@ public final class AuthUtil {
                 continue;
             }
             parts.add(
-                    fuzzy
-                            ? StringUtils.format("zrdw.code like '{}%'", code)
-                            : StringUtils.format("zrdw.code = '{}'", code)
+                    fuzzy ? StringUtils.format("{} like '{}%'", field, code)
+                            : StringUtils.format("{} = '{}'", field, code)
             );
         }
 
@@ -162,11 +202,8 @@ public final class AuthUtil {
             return "";
         }
 
-        return StringUtils.format(
-                EXIST_SQL,
-                xmId,
-                joinOr(parts)
-        );
+        String conditionPart = joinOr(parts);
+        return StringUtils.format(sqlTemplate, tableAlias, conditionPart);
     }
 
     /* ========================== 仅本人 ========================== */
@@ -179,11 +216,29 @@ public final class AuthUtil {
             return "";
         }
 
-        return StringUtils.format(
-                "{} = '{}'",
-                StringUtils.format("{}.{}", tableAlias, fields[0]),
-                userName
-        );
+        List<String> conditions = new ArrayList<>();
+
+        for (String field : fields) {
+            String cond;
+            // 检查是否为特殊字段（存在于 sqlMap 中）
+            if (FieldGroup.isSpecialField(field)) {
+                // 特殊字段使用 exist 查询（本人数据模式）
+                cond = buildExist(tableAlias, field, new String[]{userName}, false);
+            } else {
+                // 普通字段直接匹配 userName
+                cond = StringUtils.format(
+                        "{} = '{}'",
+                        StringUtils.format("{}.{}", tableAlias, field),
+                        userName
+                );
+            }
+
+            if (StringUtils.isNotBlank(cond)) {
+                conditions.add(cond);
+            }
+        }
+
+        return joinOr(conditions);
     }
 
     /* ========================== 工具方法 ========================== */

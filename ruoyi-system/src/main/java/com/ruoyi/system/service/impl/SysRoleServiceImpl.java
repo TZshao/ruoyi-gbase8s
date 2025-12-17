@@ -54,7 +54,7 @@ public class SysRoleServiceImpl implements ISysRoleService
      * @return 角色数据集合信息
      */
     @Override
-    @DataScope(tableAlias = "d",fieldGroup = FieldGroup.SYS_DEPT_CODE)
+    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE,selfFieldGroup = FieldGroup.REJECT)
     public List<SysRole> selectRoleList(SysRole role)
     {
         return roleMapper.selectRoleList(role);
