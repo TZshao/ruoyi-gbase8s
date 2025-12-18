@@ -96,7 +96,7 @@ function handleTest() {
   loading.value = true
   testAuthSql(form.dataScope, form.fieldGroup, form.deptCodes).then(res => {
     if(res){
-      result.value ="select * from XX where XX AND ("+'\n'+ res+")"
+      result.value = "select * from ? where yourCnd AND (" + '\n' + res + '\n' + ")";
     }else{
       result.value = "无权限SQL"
     }

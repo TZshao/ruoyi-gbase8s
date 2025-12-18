@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hfits.system.workflow.mapper.FlowDefMapper">
+
+    <resultMap type="com.hfits.system.workflow.domain.FlowDef" id="FlowDefResult">
+        <id     property="id"         column="id"/>
+        <result property="flowCode"   column="flow_code"/>
+        <result property="flowName"   column="flow_name"/>
+        <result property="formSchema" column="form_schema"/>
+        <result property="version"    column="version"/>
+        <result property="publish"    column="publish"/>
+        <result property="isDel"      column="is_del"/>
+        <result property="createBy"   column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy"   column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark"     column="remark"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, flow_code, flow_name, form_schema, version, publish, is_del, create_by,
+        create_time, update_by, update_time, remark
+    </sql>
+
+    <select id="selectFlowDefById" parameterType="Long" resultMap="FlowDefResult">
+        select <include refid="Base_Column_List"/> from flow_def where id = #{id}
+    </select>
+
+    <select id="selectFlowDefList" parameterType="FlowDef" resultMap="FlowDefResult">
+        select fd.* from flow_def fd
+        join (
+            SELECT flow_code, MAX(version) AS max_ver
+            FROM flow_def
+            WHERE NOT is_del
+            GROUP BY flow_code
+            ) t ON fd.flow_code = t.flow_code AND fd.version = t.max_ver
+        <where>
+            <if test="flowCode != null and flowCode != ''">
+                AND fd.flow_code like concat('%', #{flowCode}, '%')
+            </if>
+            <if test="flowName != null and flowName != ''">
+                AND fd.flow_name like concat('%', #{flowName}, '%')
+            </if>
+            <if test="isDel != null and isDel">
+                and fd.is_del
+            </if>
+            <if test="isDel != null and !isDel">
+                and not fd.is_del
+            </if>
+            <if test="publish != null">
+                and fd.publish = #{publish}
+            </if>
+        </where>
+        order by fd.id desc
+    </select>
+
+    <select id="listByFlowCode" parameterType="String" resultMap="FlowDefResult">
+        select <include refid="Base_Column_List"/> from flow_def
+        where flow_code = #{flowCode} and not is_del
+        order by version desc
+    </select>
+
+    <insert id="insertFlowDef" parameterType="FlowDef" useGeneratedKeys="true" keyProperty="id">
+        insert into flow_def(
+            <trim suffixOverrides=",">
+                <if test="flowCode != null">flow_code,</if>
+                <if test="flowName != null">flow_name,</if>
+                <if test="formSchema != null">form_schema,</if>
+                <if test="version != null">version,</if>
+                <if test="publish != null">publish,</if>
+                <if test="isDel != null">is_del,</if>
+                <if test="remark != null">remark,</if>
+                <if test="createBy != null">create_by,</if>
+                <if test="createTime != null">create_time,</if>
+                <if test="updateBy != null">update_by,</if>
+                <if test="updateTime != null">update_time,</if>
+            </trim>
+        ) values(
+            <trim suffixOverrides=",">
+                <if test="flowCode != null">#{flowCode},</if>
+                <if test="flowName != null">#{flowName},</if>
+                <if test="formSchema != null">#{formSchema},</if>
+                <if test="version != null">#{version},</if>
+                <if test="publish != null">#{publish},</if>
+                <if test="isDel != null">#{isDel},</if>
+                <if test="remark != null">#{remark},</if>
+                <if test="createBy != null">#{createBy},</if>
+                <if test="createTime != null">#{createTime},</if>
+                <if test="updateBy != null">#{updateBy},</if>
+                <if test="updateTime != null">#{updateTime},</if>
+            </trim>
+        )
+    </insert>
+
+    <update id="updateFlowDef" parameterType="FlowDef">
+        update flow_def
+        <set>
+            <if test="flowCode != null">flow_code = #{flowCode},</if>
+            <if test="flowName != null">flow_name = #{flowName},</if>
+            <if test="formSchema != null">form_schema = #{formSchema},</if>
+            <if test="version != null">version = #{version},</if>
+            <if test="publish != null">publish = #{publish},</if>
+            <if test="isDel != null">is_del = #{isDel},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFlowDefById" parameterType="Long">
+        delete from flow_def where id = #{id}
+    </delete>
+
+    <delete id="deleteFlowDefByIds" parameterType="Long">
+        delete from flow_def where id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
+
