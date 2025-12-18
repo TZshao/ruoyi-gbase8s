@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.sql.Date;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * API接口统计
@@ -82,28 +83,14 @@ public class ApiStatisticsController extends BaseController {
     @PreAuthorize("@ss.hasPermi('monitor:apiStatistics:query')")
     @GetMapping("/detail")
     public Resp<List<Map<String, Object>>> getInfo(String apiKey,Integer limit) {
-//        if (StringUtils.isEmpty(apiKey)) {
-//            return errorR("接口标识不能为空");
-//        }
-//        List<ApiLog> list = apiStatisticsService.getLogList(apiKey,limit);
-//        List<Map<String, Object>> resultMap = new ArrayList<>();
-//        //忽略无用字段减少数据量
-//        list.forEach(item ->
-//                resultMap.add(Map.of("create_time", item.getCreateTime(), "responseTime", item.getResponseTime())));
-//        return successR(resultMap);
-
-        List<Map<String, Object>> resultMap = new ArrayList<>();
-        long now = System.currentTimeMillis();
-        Random random = new Random();
-
-        for (int i = 0; i < limit; i++) {
-            Map<String, Object> map = new HashMap<>();
-            // 假定每条数据的create_time递减，模拟最近2k次调用
-            map.put("create_time", new Date(now - i * 1000L * 60)); // 间隔1分钟
-            map.put("responseTime", 50 + random.nextInt(950)); // 50ms~999ms
-            resultMap.add(map);
+        if (StringUtils.isEmpty(apiKey)) {
+            return errorR("接口标识不能为空");
         }
-
+        List<ApiLog> list = apiStatisticsService.getLogList(apiKey,limit);
+        List<Map<String, Object>> resultMap = new ArrayList<>();
+        //忽略无用字段减少数据量
+        list.forEach(item ->
+                resultMap.add(Map.of("create_time", item.getCreateTime(), "responseTime", item.getResponseTime())));
         return successR(resultMap);
     }
 

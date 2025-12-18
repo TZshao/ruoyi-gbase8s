@@ -156,12 +156,12 @@
               <div style="display: flex; align-items: center;">
                 <el-icon style="margin-right: 8px;"><TrendCharts /></el-icon>
                 <span>接口统计详情
-                  <el-input type="text" style="margin-left: 8px; width: 120px;" v-model="detailSize" >
+                  <el-input type="text" style="margin-left: 8px; width: 120px;" v-model="detailSize" @blur="handleApiClick(undefined)">
                     <template #append>条</template>
                   </el-input>
                 </span>
                 <span v-if="selectedApi" style="margin-left: 15px; color: #409EFF; font-weight: bold;">
-                  {{ formatApiKey(selectedApi) }}
+                  {{ selectedApi }}
                 </span>
               </div>
               <el-button v-if="selectedApi" type="text" @click="clearSelection">清除选择</el-button>
@@ -225,7 +225,7 @@ const errorApiList = ref([])
 const selectedApi = ref(null)
 const apiLogList = ref([])
 const chartRef = ref(null)
-const detailSize = ref(500)
+const detailSize = ref(200)
 let chartInstance = null
 const showRecent100ForSlow = ref(false)
 const frequentPeriod = ref(7) // '7days' 近7天, '30days' 近30天
@@ -264,11 +264,16 @@ function getList() {
 
 /** 点击接口名称 */
 function handleApiClick(row) {
-  selectedApi.value = row.apiKey
-  var param={
-    apiKey:row.apiKey,
-    limit: detailSize.value,
+  if (row){
+    selectedApi.value = row.apiKey
   }
+  if (!selectedApi.value){
+    return
+  }
+  const param = {
+    apiKey: selectedApi.value,
+    limit: detailSize.value,
+  };
   getApiDetail(param)
 }
 
