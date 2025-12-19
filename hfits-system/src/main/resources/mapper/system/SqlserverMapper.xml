@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hfits.system.core.mapper.SqlserverMapper">
+
+    <select id="tables" resultType="String">
+        SELECT TABLE_NAME AS name
+        FROM INFORMATION_SCHEMA.TABLES
+        WHERE TABLE_TYPE = 'BASE TABLE'
+        ORDER BY TABLE_NAME
+    </select>
+
+    <select id="table" resultType="com.hfits.system.core.domain.TableColumn">
+        SELECT
+            c.COLUMN_NAME      AS columnName,
+            c.DATA_TYPE        AS columnType,
+            CASE WHEN c.IS_NULLABLE = 'NO' THEN '1' ELSE '0' END AS isRequired,
+            ISNULL(ep.value, '') AS columnComment
+        FROM INFORMATION_SCHEMA.COLUMNS c
+        LEFT JOIN sys.extended_properties ep 
+            ON ep.major_id = OBJECT_ID(QUOTENAME(c.TABLE_SCHEMA) + '.' + QUOTENAME(c.TABLE_NAME))
+            AND ep.minor_id = c.ORDINAL_POSITION
+            AND ep.name = 'MS_Description'
+            AND ep.class = 1
+        WHERE c.TABLE_NAME = #{tableName}
+        ORDER BY c.ORDINAL_POSITION
+    </select>
+
+    <select id="selectTableData" resultType="java.util.HashMap">
+        SELECT * FROM ${tableName}
+    </select>
+
+    <select id="selectTableDataLimit" resultType="java.util.HashMap">
+        SELECT TOP ${limit} * FROM ${tableName}
+    </select>
+</mapper>

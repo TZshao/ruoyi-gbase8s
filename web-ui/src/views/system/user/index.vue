@@ -3,7 +3,7 @@
     <el-row :gutter="20">
       <splitpanes :horizontal="appStore.device === 'mobile'" class="default-theme">
         <!--部门数据-->
-        <pane size="12">
+        <pane size="16">
           <el-col>
             <div class="head-container">
               <el-input v-model="deptName" placeholder="请输入部门名称" clearable prefix-icon="Search" style="margin-bottom: 20px" />
@@ -14,7 +14,7 @@
           </el-col>
         </pane>
         <!--用户数据-->
-        <pane size="88">
+        <pane size="84">
           <el-col>
             <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
               <el-form-item label="用户名称" prop="userName">
@@ -237,21 +237,23 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="数据权限" v-show="form.dataScope == 2">
-          <el-checkbox v-model="deptExpand" @change="handleCheckedTreeExpand">展开/折叠</el-checkbox>
-          <el-checkbox v-model="deptNodeAll" @change="handleCheckedTreeNodeAll">全选/全不选</el-checkbox>
-          <el-checkbox v-model="form.deptCheckStrictly" @change="handleCheckedTreeConnect">父子联动</el-checkbox>
-          <el-tree
-            class="tree-border"
-            :data="dataScopeDeptOptions"
-            show-checkbox
-            default-expand-all
-            ref="deptRef"
-            node-key="code"
-            :check-strictly="!form.deptCheckStrictly"
-            empty-text="加载中，请稍候"
-            :props="{ label: 'label', children: 'children' }"
-          ></el-tree>
+        <el-form-item label="数据权限">
+          <div :class="{ 'tree-disabled': form.dataScope != 2 }">
+            <el-checkbox v-model="deptExpand" @change="handleCheckedTreeExpand" :disabled="form.dataScope != 2">展开/折叠</el-checkbox>
+            <el-checkbox v-model="deptNodeAll" @change="handleCheckedTreeNodeAll" :disabled="form.dataScope != 2">全选/全不选</el-checkbox>
+            <el-checkbox v-model="form.deptCheckStrictly" @change="handleCheckedTreeConnect" :disabled="form.dataScope != 2">父子联动</el-checkbox>
+            <el-tree
+              class="tree-border"
+              :data="dataScopeDeptOptions"
+              show-checkbox
+              default-expand-all
+              ref="deptRef"
+              node-key="code"
+              :check-strictly="!form.deptCheckStrictly"
+              empty-text="加载中，请稍候"
+              :props="{ label: 'label', children: 'children' }"
+            ></el-tree>
+          </div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -522,7 +524,15 @@ function handleDataScope(row) {
       deptTreePromise.then(res => {
         nextTick(() => {
           if (deptRef.value) {
-            deptRef.value.setCheckedKeys(res.checkedKeys || [])
+            // 如果 dataScope 是 1、3、5，需要根据权限类型自动选中部门
+            const dataScope = form.value.dataScope
+            if (dataScope === "1" || dataScope === "3" || dataScope === "5") {
+              // 调用数据权限范围切换逻辑来选中对应的部门
+              dataScopeSelectChange(dataScope)
+            } else {
+              // 自定数据权限，使用后端返回的 checkedKeys
+              deptRef.value.setCheckedKeys(res.checkedKeys || [])
+            }
           }
         })
       })
@@ -532,9 +542,68 @@ function handleDataScope(row) {
 
 /** 数据权限范围切换 */
 function dataScopeSelectChange(value) {
-  if (value !== "2" && deptRef.value) {
-    deptRef.value.setCheckedKeys([])
+  if (!deptRef.value || !dataScopeDeptOptions.value || dataScopeDeptOptions.value.length === 0) {
+    return
   }
+
+  if (value === "2") {
+    // 自定数据权限，不清空已选中的部门
+    return
+  }
+
+  // 获取所有部门的 code 列表
+  const getAllDeptCodes = (depts) => {
+    let codes = []
+    depts.forEach(dept => {
+      if (dept.code) {
+        codes.push(dept.code)
+      }
+      if (dept.children && dept.children.length > 0) {
+        codes = codes.concat(getAllDeptCodes(dept.children))
+      }
+    })
+    return codes
+  }
+
+  // 根据 deptId 或 deptCode 查找部门及其所有子部门的 code
+  const findDeptCodes = (depts, targetDeptId, targetDeptCode) => {
+    for (const dept of depts) {
+      if ((targetDeptId && dept.id === targetDeptId) || (targetDeptCode && dept.code === targetDeptCode)) {
+        // 找到目标部门，返回该部门及其所有子部门的 code
+        const codes = [dept.code]
+        if (dept.children && dept.children.length > 0) {
+          codes.push(...getAllDeptCodes(dept.children))
+        }
+        return codes
+      }
+      if (dept.children && dept.children.length > 0) {
+        const found = findDeptCodes(dept.children, targetDeptId, targetDeptCode)
+        if (found && found.length > 0) {
+          return found
+        }
+      }
+    }
+    return []
+  }
+
+  nextTick(() => {
+    let checkedKeys = []
+
+    if (value === "1") {
+      // 全部数据权限：选中所有部门
+      checkedKeys = getAllDeptCodes(dataScopeDeptOptions.value)
+    } else if (value === "3" || value === "5") {
+      // 本部门数据权限 或 仅本人数据权限：选中用户所属部门
+      const userDeptCodes = findDeptCodes(dataScopeDeptOptions.value, form.value.deptId, form.value.deptCode)
+      checkedKeys = userDeptCodes
+    }
+
+    if (checkedKeys.length > 0) {
+      deptRef.value.setCheckedKeys(checkedKeys)
+    } else {
+      deptRef.value.setCheckedKeys([])
+    }
+  })
 }
 
 /** 树（展开/折叠） */
@@ -762,3 +831,10 @@ onMounted(() => {
   })
 })
 </script>
+
+<style scoped>
+.tree-disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+</style>

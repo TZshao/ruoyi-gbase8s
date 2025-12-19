@@ -85,7 +85,7 @@ public final class AuthUtil {
                     buildByCodes(tableAlias, fields, deptCode, true);
 
             case DATA_SCOPE_CUSTOM -> //自定义
-                    buildByCodes(tableAlias, fields, authDeptCodes, false);
+                    buildByCodes(tableAlias, fields, filterPrefixCodes(authDeptCodes), true);
 
             //本人数据  t.fields[0] = user.userName
             case DATA_SCOPE_SELF -> buildSelf(user, tableAlias, fields);
@@ -240,6 +240,45 @@ public final class AuthUtil {
     }
 
     /* ========================== 工具方法 ========================== */
+
+    /**
+     * 过滤部门编码，移除那些是其他编码前缀的子编码
+     * 例如：[1001,10011,10012,1002] -> [1001,1002]
+     * 因为1001%已经包括了10011%和10012%
+     *
+     * @param codes 原始部门编码数组
+     * @return 过滤后的部门编码数组
+     */
+    private static String[] filterPrefixCodes(String[] codes) {
+        if (codes == null || codes.length == 0) {
+            return codes;
+        }
+
+        List<String> result = new ArrayList<>();
+        for (String code : codes) {
+            if (StringUtils.isBlank(code)) {
+                continue;
+            }
+            // 检查当前编码是否是其他编码的子编码（即是否有其他编码是它的前缀）
+            boolean isSubCode = false;
+            for (String otherCode : codes) {
+                if (StringUtils.isBlank(otherCode) || code.equals(otherCode)) {
+                    continue;
+                }
+                // 如果code以otherCode开头，说明otherCode是code的前缀，code是子编码，应该移除
+                if (code.startsWith(otherCode)) {
+                    isSubCode = true;
+                    break;
+                }
+            }
+            // 只保留不是任何其他编码子编码的编码
+            if (!isSubCode) {
+                result.add(code);
+            }
+        }
+
+        return result.toArray(new String[0]);
+    }
 
     private static String toInClause(String[] values) {
         List<String> list = new ArrayList<>();

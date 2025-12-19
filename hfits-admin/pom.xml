@@ -43,6 +43,12 @@
             <artifactId>mysql-connector-j</artifactId>
         </dependency>
 
+        <!-- SQL Server 驱动包（用于数据迁移）- 使用 jTDS 驱动，对旧版 SQL Server 支持更好 -->
+        <dependency>
+            <groupId>net.sourceforge.jtds</groupId>
+            <artifactId>jtds</artifactId>
+        </dependency>
+
         <!-- 核心模块-->
         <dependency>
             <groupId>com.hfits</groupId>

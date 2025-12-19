@@ -36,6 +36,9 @@
           </el-col>
         </el-row>
       </el-tab-pane>
+      <el-tab-pane label="SQL Server数据源" name="sqlserver">
+        <SqlServerDataSourceExample />
+      </el-tab-pane>
     </el-tabs>
   </div>
 </template>
@@ -45,6 +48,7 @@ import { ref } from "vue"
 import FlowApplyExample from "./components/FlowApplyExample.vue"
 import FlowApproveExample from "./components/FlowApproveExample.vue"
 import TestAuthExample from "./components/TestAuthExample.vue"
+import SqlServerDataSourceExample from "./components/SqlServerDataSourceExample.vue"
 
 const activeTab = ref("flow")
 </script>

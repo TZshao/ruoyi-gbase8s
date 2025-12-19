@@ -49,6 +49,17 @@ public class DruidConfig
         return druidProperties.dataSource(dataSource);
     }
 
+    @Bean
+    @ConfigurationProperties("spring.datasource.druid.sqlserver")
+    @ConditionalOnProperty(prefix = "spring.datasource.druid.sqlserver", name = "enabled", havingValue = "true")
+    public DataSource sqlserverDataSource()
+    {
+        // @ConfigurationProperties 会自动绑定 spring.datasource.druid.sqlserver 下的所有配置
+        // 包括 driverClassName, url, username, password 以及连接池参数
+        DruidDataSource dataSource = DruidDataSourceBuilder.create().build();
+        return dataSource;
+    }
+
     @Bean(name = "dynamicDataSource")
     @Primary
     public DynamicDataSource dataSource(DataSource masterDataSource)
@@ -56,6 +67,7 @@ public class DruidConfig
         Map<Object, Object> targetDataSources = new HashMap<>();
         targetDataSources.put(DataSourceType.MASTER.name(), masterDataSource);
         setDataSource(targetDataSources, DataSourceType.SLAVE.name(), "slaveDataSource");
+        setDataSource(targetDataSources, DataSourceType.SQLSERVER.name(), "sqlserverDataSource");
         return new DynamicDataSource(masterDataSource, targetDataSources);
     }
 
