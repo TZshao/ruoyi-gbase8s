@@ -1,16 +1,5 @@
 package com.hfits.web.controller.monitor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import com.hfits.common.annotation.log.Log;
 import com.hfits.common.constant.CacheConstants;
 import com.hfits.common.core.controller.BaseController;
@@ -21,7 +10,15 @@ import com.hfits.common.core.redis.RedisCache;
 import com.hfits.common.enums.BusinessType;
 import com.hfits.common.utils.StringUtils;
 import com.hfits.system.core.domain.SysUserOnline;
-import com.hfits.system.core.service.ISysUserOnlineService;
+import com.hfits.system.core.service.SysUserOnlineService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 在线用户监控
@@ -33,7 +30,7 @@ import com.hfits.system.core.service.ISysUserOnlineService;
 public class SysUserOnlineController extends BaseController
 {
     @Autowired
-    private ISysUserOnlineService userOnlineService;
+    private SysUserOnlineService userOnlineService;
 
     @Autowired
     private RedisCache redisCache;

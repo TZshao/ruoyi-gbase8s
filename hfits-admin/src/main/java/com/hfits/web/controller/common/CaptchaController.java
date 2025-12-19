@@ -18,7 +18,7 @@ import com.hfits.common.core.domain.AjaxResult;
 import com.hfits.common.core.redis.RedisCache;
 import com.hfits.common.utils.sign.Base64;
 import com.hfits.common.utils.uuid.IdUtils;
-import com.hfits.system.core.service.ISysConfigService;
+import com.hfits.system.core.service.SysConfigService;
 
 /**
  * 验证码操作处理
@@ -38,7 +38,7 @@ public class CaptchaController
     private RedisCache redisCache;
 
     @Autowired
-    private ISysConfigService configService;
+    private SysConfigService configService;
     /**
      * 生成验证码
      */

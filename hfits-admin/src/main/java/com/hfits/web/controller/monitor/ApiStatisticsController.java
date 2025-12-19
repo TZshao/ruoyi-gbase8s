@@ -5,7 +5,7 @@ import com.hfits.common.core.domain.Resp;
 import com.hfits.common.utils.StringUtils;
 import com.hfits.system.core.domain.ApiLog;
 import com.hfits.system.core.domain.vo.ApiStatis;
-import com.hfits.system.core.service.IApiStatisticsService;
+import com.hfits.system.core.service.ApiStatisticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +27,7 @@ import java.util.Map;
 @RequestMapping("/monitor/api/statistics")
 public class ApiStatisticsController extends BaseController {
     @Autowired
-    private IApiStatisticsService apiStatisticsService;
+    private ApiStatisticsService apiStatisticsService;
 
     /**
      * 获取严重耗时接口列表

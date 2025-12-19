@@ -1,18 +1,19 @@
 package com.hfits.framework.web.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import com.hfits.common.constant.Constants;
 import com.hfits.common.constant.UserConstants;
 import com.hfits.common.core.domain.entity.SysRole;
 import com.hfits.common.core.domain.entity.SysUser;
 import com.hfits.common.utils.StringUtils;
-import com.hfits.system.core.service.ISysMenuService;
-import com.hfits.system.core.service.ISysRoleService;
+import com.hfits.system.core.service.SysMenuService;
+import com.hfits.system.core.service.SysRoleService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 用户权限处理
@@ -23,10 +24,10 @@ import com.hfits.system.core.service.ISysRoleService;
 public class SysPermissionService
 {
     @Autowired
-    private ISysRoleService roleService;
+    private SysRoleService roleService;
 
     @Autowired
-    private ISysMenuService menuService;
+    private SysMenuService menuService;
 
     /**
      * 获取角色数据权限

@@ -2,6 +2,9 @@ package com.hfits.framework.manager.factory;
 
 import java.util.TimerTask;
 
+import com.hfits.system.core.service.ApiStatisticsService;
+import com.hfits.system.core.service.SysLogininforService;
+import com.hfits.system.core.service.SysOperLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hfits.common.constant.Constants;
@@ -15,9 +18,6 @@ import com.hfits.common.utils.spring.SpringUtils;
 import com.hfits.system.core.domain.ApiLog;
 import com.hfits.system.core.domain.SysLogininfor;
 import com.hfits.system.core.domain.SysOperLog;
-import com.hfits.system.core.service.IApiStatisticsService;
-import com.hfits.system.core.service.ISysLogininforService;
-import com.hfits.system.core.service.ISysOperLogService;
 
 /**
  * 异步工厂（产生任务用）
@@ -71,7 +71,7 @@ public class AsyncFactory {
                     logininfor.setStatus(Constants.FAIL);
                 }
                 // 插入数据
-                SpringUtils.getBean(ISysLogininforService.class).insertLogininfor(logininfor);
+                SpringUtils.getBean(SysLogininforService.class).insertLogininfor(logininfor);
             }
         };
     }
@@ -88,7 +88,7 @@ public class AsyncFactory {
             public void run() {
                 // 远程查询操作地点
                 operLog.setOperLocation(AddressUtils.getRealAddressByIP(operLog.getOperIp()));
-                SpringUtils.getBean(ISysOperLogService.class).insertOperlog(operLog);
+                SpringUtils.getBean(SysOperLogService.class).insertOperlog(operLog);
             }
         };
     }
@@ -103,7 +103,7 @@ public class AsyncFactory {
         return new TimerTask() {
             @Override
             public void run() {
-                SpringUtils.getBean(IApiStatisticsService.class).saveRecord(record);
+                SpringUtils.getBean(ApiStatisticsService.class).saveRecord(record);
             }
         };
     }

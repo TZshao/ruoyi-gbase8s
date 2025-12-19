@@ -1,5 +1,12 @@
 package com.hfits.framework.web.service;
 
+import com.hfits.common.core.domain.entity.SysUser;
+import com.hfits.common.core.domain.model.LoginUser;
+import com.hfits.common.enums.UserStatus;
+import com.hfits.common.exception.ServiceException;
+import com.hfits.common.utils.MessageUtils;
+import com.hfits.common.utils.StringUtils;
+import com.hfits.system.core.service.SysUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,13 +14,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import com.hfits.common.core.domain.entity.SysUser;
-import com.hfits.common.core.domain.model.LoginUser;
-import com.hfits.common.enums.UserStatus;
-import com.hfits.common.exception.ServiceException;
-import com.hfits.common.utils.MessageUtils;
-import com.hfits.common.utils.StringUtils;
-import com.hfits.system.core.service.ISysUserService;
 
 /**
  * 用户验证处理
@@ -26,7 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService
     private static final Logger log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
     @Autowired
-    private ISysUserService userService;
+    private SysUserService userService;
 
     @Autowired
     private SysPasswordService passwordService;

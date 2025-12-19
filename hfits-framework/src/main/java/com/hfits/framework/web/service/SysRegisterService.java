@@ -1,7 +1,5 @@
 package com.hfits.framework.web.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import com.hfits.common.constant.CacheConstants;
 import com.hfits.common.constant.Constants;
 import com.hfits.common.constant.UserConstants;
@@ -16,8 +14,10 @@ import com.hfits.common.utils.SecurityUtils;
 import com.hfits.common.utils.StringUtils;
 import com.hfits.framework.manager.AsyncManager;
 import com.hfits.framework.manager.factory.AsyncFactory;
-import com.hfits.system.core.service.ISysConfigService;
-import com.hfits.system.core.service.ISysUserService;
+import com.hfits.system.core.service.SysConfigService;
+import com.hfits.system.core.service.SysUserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * 注册校验方法
@@ -28,10 +28,10 @@ import com.hfits.system.core.service.ISysUserService;
 public class SysRegisterService
 {
     @Autowired
-    private ISysUserService userService;
+    private SysUserService userService;
 
     @Autowired
-    private ISysConfigService configService;
+    private SysConfigService configService;
 
     @Autowired
     private RedisCache redisCache;

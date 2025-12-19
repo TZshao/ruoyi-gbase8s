@@ -1,23 +1,12 @@
 package com.hfits.framework.web.service;
 
-import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 import com.hfits.common.constant.CacheConstants;
 import com.hfits.common.constant.Constants;
 import com.hfits.common.constant.UserConstants;
 import com.hfits.common.core.domain.model.LoginUser;
 import com.hfits.common.core.redis.RedisCache;
 import com.hfits.common.exception.ServiceException;
-import com.hfits.common.exception.user.BlackListException;
-import com.hfits.common.exception.user.CaptchaException;
-import com.hfits.common.exception.user.CaptchaExpireException;
-import com.hfits.common.exception.user.UserNotExistsException;
-import com.hfits.common.exception.user.UserPasswordNotMatchException;
+import com.hfits.common.exception.user.*;
 import com.hfits.common.utils.DateUtils;
 import com.hfits.common.utils.MessageUtils;
 import com.hfits.common.utils.StringUtils;
@@ -25,8 +14,15 @@ import com.hfits.common.utils.ip.IpUtils;
 import com.hfits.framework.manager.AsyncManager;
 import com.hfits.framework.manager.factory.AsyncFactory;
 import com.hfits.framework.security.context.AuthenticationContextHolder;
-import com.hfits.system.core.service.ISysConfigService;
-import com.hfits.system.core.service.ISysUserService;
+import com.hfits.system.core.service.SysConfigService;
+import com.hfits.system.core.service.SysUserService;
+import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
 
 /**
  * 登录校验方法
@@ -46,10 +42,10 @@ public class SysLoginService
     private RedisCache redisCache;
 
     @Autowired
-    private ISysUserService userService;
+    private SysUserService userService;
 
     @Autowired
-    private ISysConfigService configService;
+    private SysConfigService configService;
 
     /**
      * 登录验证

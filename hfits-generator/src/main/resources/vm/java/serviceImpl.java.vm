@@ -1,4 +1,4 @@
-package ${packageName}.service.impl;
+package ${packageName}.service;
 
 import java.util.List;
 #foreach ($column in $columns)
@@ -17,7 +17,6 @@ import ${packageName}.domain.${subClassName};
 #end
 import ${packageName}.mapper.${ClassName}Mapper;
 import ${packageName}.domain.${ClassName};
-import ${packageName}.service.I${ClassName}Service;
 
 /**
  * ${functionName}Service业务层处理
@@ -26,8 +25,7 @@ import ${packageName}.service.I${ClassName}Service;
  * @date ${datetime}
  */
 @Service
-public class ${ClassName}ServiceImpl implements I${ClassName}Service
-{
+public class ${ClassName}Service {
     @Autowired
     private ${ClassName}Mapper ${className}Mapper;
 
