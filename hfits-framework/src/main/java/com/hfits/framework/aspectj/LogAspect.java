@@ -73,12 +73,8 @@ public class LogAspect {
 
     /**
      * 处理请求前执行
-     * 支持复合注解（如 @PostMappingLog、@DeleteMappingLog、@PutMappingLog 等）
      */
-    @Before(value = "@annotation(com.hfits.common.annotation.log.Log) " +
-            "|| @annotation(com.hfits.common.annotation.log.PostMappingLog)" +
-            "|| @annotation(com.hfits.common.annotation.log.DeleteMappingLog) " +
-            "|| @annotation(com.hfits.common.annotation.log.PutMappingLog)")
+    @Before(value = "@annotation(com.hfits.common.annotation.log.Log)")
     public void doBefore(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Log controllerLog = AnnotationUtils.findAnnotation(signature.getMethod(), Log.class);
@@ -93,14 +89,10 @@ public class LogAspect {
 
     /**
      * 处理完请求后执行
-     * 支持复合注解（如 @PostMappingLog、@DeleteMappingLog、@PutMappingLog 等）
      *
      * @param joinPoint 切点
      */
-    @AfterReturning(pointcut = "@annotation(com.hfits.common.annotation.log.Log) " +
-            "|| @annotation(com.hfits.common.annotation.log.PostMappingLog) " +
-            "|| @annotation(com.hfits.common.annotation.log.DeleteMappingLog) " +
-            "|| @annotation(com.hfits.common.annotation.log.PutMappingLog)", returning = "jsonResult")
+    @AfterReturning(pointcut = "@annotation(com.hfits.common.annotation.log.Log)", returning = "jsonResult")
     public void doAfterReturning(JoinPoint joinPoint, Object jsonResult) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Log controllerLog = AnnotationUtils.findAnnotation(signature.getMethod(), Log.class);
@@ -111,15 +103,11 @@ public class LogAspect {
 
     /**
      * 拦截异常操作
-     * 支持复合注解（如 @PostMappingLog、@DeleteMappingLog、@PutMappingLog 等）
      *
      * @param joinPoint 切点
      * @param e         异常
      */
-    @AfterThrowing(value = "@annotation(com.hfits.common.annotation.log.Log) " +
-            "|| @annotation(com.hfits.common.annotation.log.PostMappingLog) " +
-            "|| @annotation(com.hfits.common.annotation.log.DeleteMappingLog) " +
-            "|| @annotation(com.hfits.common.annotation.log.PutMappingLog)", throwing = "e")
+    @AfterThrowing(value = "@annotation(com.hfits.common.annotation.log.Log)", throwing = "e")
     public void doAfterThrowing(JoinPoint joinPoint, Exception e) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Log controllerLog = AnnotationUtils.findAnnotation(signature.getMethod(), Log.class);

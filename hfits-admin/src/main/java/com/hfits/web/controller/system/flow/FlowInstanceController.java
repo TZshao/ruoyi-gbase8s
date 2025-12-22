@@ -1,9 +1,7 @@
 package com.hfits.web.controller.system.flow;
 
-import com.hfits.common.annotation.log.DeleteMappingLog;
+import com.hfits.common.annotation.log.Log;
 import com.hfits.common.annotation.log.Module;
-import com.hfits.common.annotation.log.PostMappingLog;
-import com.hfits.common.annotation.log.PutMappingLog;
 import com.hfits.common.core.controller.BaseController;
 import com.hfits.common.core.domain.Resp;
 import com.hfits.common.core.page.TableDataInfo;
@@ -44,7 +42,8 @@ public class FlowInstanceController extends BaseController {
 
     //暂存
     @PreAuthorize("@ss.hasPermi('flow:instance:add')")
-    @PostMappingLog(value = "start", title = "发起流程", businessType = BusinessType.INSERT)
+    @PostMapping("start")
+    @Log(title = "发起流程", businessType = BusinessType.INSERT)
     public Resp<FlowInstance> start(@Validated @RequestBody FlowInstance flowInstance) {
         flowInstance.setApplicantId(getUserId());
         flowInstance.setCreateBy(getUsername());
@@ -53,26 +52,30 @@ public class FlowInstanceController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('flow:instance:edit')")
-    @PostMappingLog(value = "/{id}/submit", title = "提交流程实例", businessType = BusinessType.UPDATE)
+    @PostMapping("/{id}/submit")
+    @Log(title = "提交流程实例", businessType = BusinessType.UPDATE)
     public Resp<Integer> submit(@PathVariable Long id) {
         return toAjaxR(flowInstanceService.submitInstance(id));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:instance:edit')")
-    @PutMappingLog(title = "修改流程实例", businessType = BusinessType.UPDATE)
+    @PutMapping
+    @Log(title = "修改流程实例", businessType = BusinessType.UPDATE)
     public Resp<Integer> edit(@RequestBody FlowInstance flowInstance) {
         flowInstance.setUpdateBy(getUsername());
         return toAjaxR(flowInstanceService.updateFlowInstance(flowInstance));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:instance:remove')")
-    @DeleteMappingLog(value = "/{ids}", title = "删除流程实例", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{ids}")
+    @Log(title = "删除流程实例", businessType = BusinessType.DELETE)
     public Resp<Integer> remove(@PathVariable Long[] ids) {
         return toAjaxR(flowInstanceService.deleteFlowInstanceByIds(ids));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:instance:action')")
-    @PostMappingLog(value = "/{id}/action", title = "流程审批", businessType = BusinessType.UPDATE)
+    @PostMapping("/{id}/action")
+    @Log(title = "流程审批", businessType = BusinessType.UPDATE)
     public Resp<Integer> action(@PathVariable Long id, @Validated @RequestBody FlowAction flowAction) {
         flowAction.setInstanceId(id);
         flowAction.setOperatorId(getUserId());

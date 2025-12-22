@@ -8,7 +8,7 @@
     <!-- 文件编码 -->
     <property name="charset" value="UTF-8"/>
 
-    <!-- 不检查生成代码 -->
+    <!-- 不检查的代码 -->
     <module name="SuppressionFilter">
         <property name="file" value="checkstyle-suppressions.xml"/>
         <property name="optional" value="true"/>
@@ -158,7 +158,7 @@
         <module name="NestedForDepth">
             <property name="max" value="3"/>
         </module>
-        <!-- if最多嵌套3层 -->
+        <!-- if最多嵌套4层 -->
         <module name="NestedIfDepth">
             <property name="max" value="4"/>
         </module>

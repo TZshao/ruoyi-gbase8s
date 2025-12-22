@@ -24,6 +24,7 @@ target/
 *.iws
 *.iml
 *.ipr
+.vscode
 
 ### JRebel ###
 rebel.xml
@@ -41,6 +42,7 @@ nbdist/
 *.log
 *.xml.versionsBackup
 *.swp
+/hfits-admin/src/main/resources/application-dev.yml
 
 !*/build/*.java
 !*/build/*.html

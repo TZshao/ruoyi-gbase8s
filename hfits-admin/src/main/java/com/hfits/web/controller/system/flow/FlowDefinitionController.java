@@ -1,8 +1,7 @@
 package com.hfits.web.controller.system.flow;
 
+import com.hfits.common.annotation.log.Log;
 import com.hfits.common.annotation.log.Module;
-import com.hfits.common.annotation.log.PostMappingLog;
-import com.hfits.common.annotation.log.PutMappingLog;
 import com.hfits.common.core.controller.BaseController;
 import com.hfits.common.core.domain.Resp;
 import com.hfits.common.core.page.TableDataInfo;
@@ -49,27 +48,31 @@ public class FlowDefinitionController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('flow:def:add')")
-    @PostMappingLog(title = "流程定义", businessType = BusinessType.INSERT)
+    @PostMapping
+    @Log(title = "流程定义", businessType = BusinessType.INSERT)
     public Resp<?> add(@Validated @RequestBody FlowDef flowDef) {
         flowDef.setCreateBy(getUsername());
         return toAjaxR(flowDefService.insertFlowDef(flowDef));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:def:edit')")
-    @PutMappingLog(title = "流程修改", businessType = BusinessType.UPDATE)
+    @PutMapping
+    @Log(title = "流程修改", businessType = BusinessType.UPDATE)
     public Resp<?> edit(@Validated @RequestBody FlowDef flowDef) {
         flowDef.setUpdateBy(getUsername());
         return toAjaxR(flowDefService.updateFlowDef(flowDef));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:def:edit')")
-    @PostMappingLog(value = "/publish/{id}", title = "流程发布", businessType = BusinessType.UPDATE)
+    @PostMapping("/publish/{id}")
+    @Log(title = "流程发布", businessType = BusinessType.UPDATE)
     public Resp<?> publish(@PathVariable Long id) {
         return toAjaxR(flowDefService.publishFlowDef(id));
     }
 
     @PreAuthorize("@ss.hasPermi('flow:def:add')")
-    @PostMappingLog(value = "/iterate/{id}", title = "流程迭代", businessType = BusinessType.INSERT)
+    @PostMapping("/iterate/{id}")
+    @Log(title = "流程迭代", businessType = BusinessType.INSERT)
     public Resp<Long> iterate(@PathVariable Long id) {
         Long newId = flowDefService.iterateFlowDefVersion(id, getUsername());
         return successR(newId);

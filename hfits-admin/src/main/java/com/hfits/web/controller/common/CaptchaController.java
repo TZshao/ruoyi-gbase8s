@@ -67,7 +67,8 @@ public class CaptchaController {
             code = capText.substring(capText.lastIndexOf("@") + 1);
             image = captchaProducerMath.createImage(capStr);
         } else if ("char".equals(captchaType)) {
-            capStr = code = captchaProducer.createText();
+            code = captchaProducer.createText();
+            capStr = code;
             image = captchaProducer.createImage(capStr);
         }
 

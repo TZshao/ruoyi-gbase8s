@@ -9,7 +9,6 @@ import java.lang.annotation.*;
 
 /**
  * 自定义操作日志记录注解
- * 复合注解： PostMappingLog/DeleteMappingLog/PutMappingLog
  * 用法参见：
  *
  * @see com.hfits.web.controller.tool.TestController

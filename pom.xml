@@ -8,7 +8,7 @@
     <artifactId>hfits</artifactId>
     <version>3.9.0</version>
 
-    <name>hfits</name>
+    <name>hfIts</name>
     <description>HFITS管理系统</description>
 
     <properties>
@@ -247,6 +247,7 @@
                     <linkXRef>false</linkXRef>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
                 </configuration>
+<!--                编译及打包等阶段执行，不通过会进行阻断-->
                 <executions>
                     <execution>
                         <id>checkstyle-check</id>
