@@ -154,11 +154,22 @@ public final class AuthUtil {
                     : StringUtils.format("{} = '{}'", column, code);
         }
 
-        // 多值：in
-        String in = toInClause(codes);
-        return StringUtils.isBlank(in)
-                ? ""
-                : StringUtils.format("{} in {}", column, in);
+        // 多值：fuzzy=true 时使用 like，否则使用 in
+        if (fuzzy) {
+            List<String> parts = new ArrayList<>();
+            for (String code : codes) {
+                if (StringUtils.isBlank(code)) {
+                    continue;
+                }
+                parts.add(StringUtils.format("{} like '{}%'", column, code));
+            }
+            return joinOr(parts);
+        } else {
+            String in = toInClause(codes);
+            return StringUtils.isBlank(in)
+                    ? ""
+                    : StringUtils.format("{} in {}", column, in);
+        }
     }
 
     /* ========================== exist 子查询 ========================== */

@@ -2,6 +2,7 @@ package com.hfits.web.controller.monitor;
 
 import com.hfits.common.core.controller.BaseController;
 import com.hfits.common.core.domain.Resp;
+import com.hfits.common.utils.DateUtils;
 import com.hfits.common.utils.StringUtils;
 import com.hfits.system.core.domain.ApiLog;
 import com.hfits.system.core.domain.vo.ApiStatis;
@@ -14,14 +15,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 /**
  * API接口统计
- * 虽然 druid也有统计功能，但一个是不能持久化，另一个只能看到平均时长
  *
  * @author hfits
+ * @apiNote 虽然 druid也有统计功能，但是不能持久化，统计也不够直观
  */
 @RestController
 @RequestMapping("/monitor/api/statistics")
@@ -92,7 +94,10 @@ public class ApiStatisticsController extends BaseController {
         List<Map<String, Object>> resultMap = new ArrayList<>();
         //忽略无用字段减少数据量
         list.forEach(item ->
-                resultMap.add(Map.of("create_time", item.getCreateTime(), "responseTime", item.getResponseTime())));
+                resultMap.add(Map.of(
+                        "createTime", DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, item.getCreateTime()),
+                        "responseTime", item.getResponseTime()))
+        );
         return successR(resultMap);
     }
 

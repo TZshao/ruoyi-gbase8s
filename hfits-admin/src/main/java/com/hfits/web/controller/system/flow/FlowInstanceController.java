@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 流程实例/审批
+ * 流程实例
  */
 @Module("流程实例")
 @RestController
@@ -26,6 +26,12 @@ public class FlowInstanceController extends BaseController {
     @Autowired
     private FlowInstanceService flowInstanceService;
 
+    /**
+     * 查询流程实例列表
+     *
+     * @param flowInstance 流程实例查询条件
+     * @return 流程实例列表
+     */
     @PreAuthorize("@ss.hasPermi('flow:instance:list')")
     @GetMapping("/list")
     public TableDataInfo list(FlowInstance flowInstance) {
@@ -34,13 +40,24 @@ public class FlowInstanceController extends BaseController {
         return getDataTable(list);
     }
 
+    /**
+     * 根据ID获取流程实例详情
+     *
+     * @param id 流程实例ID
+     * @return 流程实例信息
+     */
     @PreAuthorize("@ss.hasPermi('flow:instance:query')")
     @GetMapping("/{id}")
     public Resp<FlowInstance> getInfo(@PathVariable Long id) {
         return successR(flowInstanceService.selectFlowInstanceById(id));
     }
 
-    //暂存
+    /**
+     * 发起流程
+     *
+     * @param flowInstance 流程实例信息
+     * @return 创建的流程实例
+     */
     @PreAuthorize("@ss.hasPermi('flow:instance:add')")
     @PostMapping("start")
     @Log(title = "发起流程", businessType = BusinessType.INSERT)
@@ -51,6 +68,12 @@ public class FlowInstanceController extends BaseController {
         return successR(instance);
     }
 
+    /**
+     * 提交流程实例
+     *
+     * @param id 流程实例ID
+     * @return 操作结果
+     */
     @PreAuthorize("@ss.hasPermi('flow:instance:edit')")
     @PostMapping("/{id}/submit")
     @Log(title = "提交流程实例", businessType = BusinessType.UPDATE)
@@ -58,6 +81,12 @@ public class FlowInstanceController extends BaseController {
         return toAjaxR(flowInstanceService.submitInstance(id));
     }
 
+    /**
+     * 修改流程实例
+     *
+     * @param flowInstance 流程实例信息
+     * @return 操作结果
+     */
     @PreAuthorize("@ss.hasPermi('flow:instance:edit')")
     @PutMapping
     @Log(title = "修改流程实例", businessType = BusinessType.UPDATE)
@@ -66,6 +95,12 @@ public class FlowInstanceController extends BaseController {
         return toAjaxR(flowInstanceService.updateFlowInstance(flowInstance));
     }
 
+    /**
+     * 删除流程实例
+     *
+     * @param ids 流程实例ID数组
+     * @return 操作结果
+     */
     @PreAuthorize("@ss.hasPermi('flow:instance:remove')")
     @DeleteMapping("/{ids}")
     @Log(title = "删除流程实例", businessType = BusinessType.DELETE)
@@ -73,6 +108,13 @@ public class FlowInstanceController extends BaseController {
         return toAjaxR(flowInstanceService.deleteFlowInstanceByIds(ids));
     }
 
+    /**
+     * 流程审批操作
+     *
+     * @param id 流程实例ID
+     * @param flowAction 流程操作信息
+     * @return 操作结果
+     */
     @PreAuthorize("@ss.hasPermi('flow:instance:action')")
     @PostMapping("/{id}/action")
     @Log(title = "流程审批", businessType = BusinessType.UPDATE)
@@ -82,6 +124,12 @@ public class FlowInstanceController extends BaseController {
         return toAjaxR(flowInstanceService.handleAction(flowAction));
     }
 
+    /**
+     * 获取流程操作列表
+     *
+     * @param id 流程实例ID
+     * @return 流程操作列表
+     */
     @PreAuthorize("@ss.hasPermi('flow:instance:query')")
     @GetMapping("/{id}/actions")
     public Resp<List<FlowAction>> actionList(@PathVariable Long id) {

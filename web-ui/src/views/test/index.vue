@@ -1,19 +1,8 @@
 <template>
   <div class="app-container">
-<!--    <el-alert-->
-<!--      type="info"-->
-<!--      :closable="false"-->
-<!--      class="mb20"-->
-<!--    >-->
-<!--      <template #title>-->
-<!--        <div>-->
-<!--          <strong>模块测试</strong>-->
-<!--        </div>-->
-<!--      </template>-->
-<!--    </el-alert>-->
 
     <el-tabs v-model="activeTab" class="test-tabs">
-      <el-tab-pane label="测试流程模块" name="flow">
+      <el-tab-pane label="流程测试" name="flow">
         <el-row :gutter="20" class="component-row">
           <el-col :span="12">
             <div >

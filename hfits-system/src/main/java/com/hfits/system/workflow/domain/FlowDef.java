@@ -11,16 +11,25 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public class FlowDef extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * PK
+     */
     private Long id;
 
+    /**
+     * 流程编码
+     */
     @NotBlank(message = "流程码不能为空")
     private String flowCode;
 
+    /**
+     * 流程名
+     */
     @NotBlank(message = "流程名不能为空")
     private String flowName;
 
     /**
-     * JSON schema 字符串
+     * 表单定义JSON
      */
     private String formSchema;
 
@@ -29,8 +38,14 @@ public class FlowDef extends BaseEntity {
      */
     private Integer version;
 
+    /**
+     * 是否发布
+     */
     private Boolean publish;
 
+    /**
+     * 是否删除
+     */
     private Boolean isDel = false;
 
     public Boolean isPublish() {

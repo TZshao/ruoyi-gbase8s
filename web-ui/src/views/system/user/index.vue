@@ -9,7 +9,7 @@
               <el-input v-model="deptName" placeholder="请输入部门名称" clearable prefix-icon="Search" style="margin-bottom: 20px" />
             </div>
             <div class="head-container">
-              <el-tree :data="deptOptions" :props="{ label: 'label', children: 'children' }" :expand-on-click-node="false" :filter-node-method="filterNode" ref="deptTreeRef" node-key="id" highlight-current default-expand-all @node-click="handleNodeClick" />
+              <el-tree render-after-expand accordion :data="deptOptions" :props="{ label: 'label', children: 'children' }" :expand-on-click-node="false" :filter-node-method="filterNode" ref="deptTreeRef" node-key="id" highlight-current  @node-click="handleNodeClick" />
             </div>
           </el-col>
         </pane>
@@ -246,9 +246,9 @@
               class="tree-border"
               :data="dataScopeDeptOptions"
               show-checkbox
-              default-expand-all
               ref="deptRef"
               node-key="code"
+              accordion
               :check-strictly="!form.deptCheckStrictly"
               empty-text="加载中，请稍候"
               :props="{ label: 'label', children: 'children' }"
@@ -633,10 +633,8 @@ function getDeptAllCheckedKeys() {
   if (!deptRef.value) {
     return []
   }
-  let checkedKeys = deptRef.value.getCheckedKeys()
-  let halfCheckedKeys = deptRef.value.getHalfCheckedKeys()
-  checkedKeys.unshift.apply(checkedKeys, halfCheckedKeys)
-  return checkedKeys
+  // 只返回完全选中的节点，不包含半选中的父节点
+  return deptRef.value.getCheckedKeys()
 }
 
 /** 数据权限提交 */

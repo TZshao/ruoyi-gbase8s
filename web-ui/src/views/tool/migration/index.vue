@@ -354,16 +354,9 @@ const loadTables = async () => {
     const response = await listTables()
     if (response.code === 200) {
       tableList.value = response.data.map(name => ({ name }))
-      if (tableList.value.length > 0) {
-        ElMessage.success(`加载表列表成功，共 ${tableList.value.length} 个表`)
-      } else {
-        ElMessage.warning("未找到任何表")
-      }
-    } else {
-      ElMessage.error(response.msg || "加载表列表失败")
     }
   } catch (error) {
-    ElMessage.error("加载表列表失败：" + error.message)
+    console.log(error);
   } finally {
     tableLoading.value = false
   }

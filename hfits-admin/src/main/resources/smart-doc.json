@@ -1,4 +1,26 @@
+//smart-doc插件配置
+//在IDEA maven管理中，点击plugin运行，或者执行 mvn hfits-admin [smart-doc:html] 或package阶段自动执行
+// https://smart-doc-group.github.io/zh/guide/getting-started
 {
-  "outPath": "../smart-doc",
-  "allInOne": true
+  "projectName": "HfIts",
+  "outPath": "../web-ui/public/backend-doc",
+  "serverUrl": "http://127.0.0.1:18080",
+  "requestHeaders": [
+    { "name": "Authorization", "value": "Bearer $token" }
+  ],
+  "pathPrefix": "/",
+  "allInOne": true,  //所有接口单页面
+  "createDebugPage": true,
+  "coverOld": true, //覆盖旧页面 针对markdown生成格式
+  "isStrict": true, //严格模式，要求被扫描的接口有完整的文档注释
+  "requestExample": false,
+  "style":"xt256",  //高亮Json
+  "packageFilters": "com.hfits.web.controller.system.*", //扫描的包，多个包用逗号隔开
+  "packageExcludeFilters": "com.hfits.web.controller.system.core.*", //排除的包，同上
+  "groups": [
+    {
+      "name": "流程管理",
+      "apis": "com.hfits.web.controller.system.flow.*Controller"//同上
+    }
+  ]
 }

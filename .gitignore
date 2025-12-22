@@ -47,4 +47,4 @@ nbdist/
 !*/build/*.java
 !*/build/*.html
 !*/build/*.xml
-/smart-doc/
+/web-ui/public/backend-doc/

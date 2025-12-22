@@ -19,10 +19,20 @@ public class Resp<T> implements Serializable {
      */
     public static final int FAIL = HttpStatus.ERROR;
     private static final long serialVersionUID = 1L;
+
+    /**
+     * Http响应码
+     */
     private int code;
 
+    /**
+     * 响应信息
+     */
     private String msg;
 
+    /**
+     * 载荷实体
+     */
     private T data;
 
     public static <T> Resp<T> ok() {
