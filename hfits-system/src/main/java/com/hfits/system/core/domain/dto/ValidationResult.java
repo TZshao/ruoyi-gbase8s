@@ -11,22 +11,34 @@ import java.util.List;
 public class ValidationResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    /** 是否通过 */
+    /**
+     * 是否通过
+     */
     private Boolean passed;
 
-    /** 验证数据总数 */
+    /**
+     * 验证数据总数
+     */
     private Integer totalCount;
 
-    /** 成功数量 */
+    /**
+     * 成功数量
+     */
     private Integer successCount;
 
-    /** 失败数量 */
+    /**
+     * 失败数量
+     */
     private Integer failureCount;
 
-    /** 失败记录列表 */
+    /**
+     * 失败记录列表
+     */
     private List<ValidationError> errors;
 
-    /** 验证消息 */
+    /**
+     * 验证消息
+     */
     private String message;
 
     public ValidationResult() {

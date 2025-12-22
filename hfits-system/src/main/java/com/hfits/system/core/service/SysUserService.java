@@ -34,32 +34,24 @@ import java.util.stream.Collectors;
  * @author hfits
  */
 @Service
-public class SysUserService{
+public class SysUserService {
     private static final Logger log = LoggerFactory.getLogger(SysUserService.class);
-
-    @Autowired
-    private SysUserMapper userMapper;
-
-    @Autowired
-    private SysRoleMapper roleMapper;
-
-    @Autowired
-    private SysPostMapper postMapper;
-
-    @Autowired
-    private SysUserRoleMapper userRoleMapper;
-
-    @Autowired
-    private SysUserPostMapper userPostMapper;
-
-    @Autowired
-    private SysConfigService configService;
-
-    @Autowired
-    private SysDeptService deptService;
-
     @Autowired
     protected Validator validator;
+    @Autowired
+    private SysUserMapper userMapper;
+    @Autowired
+    private SysRoleMapper roleMapper;
+    @Autowired
+    private SysPostMapper postMapper;
+    @Autowired
+    private SysUserRoleMapper userRoleMapper;
+    @Autowired
+    private SysUserPostMapper userPostMapper;
+    @Autowired
+    private SysConfigService configService;
+    @Autowired
+    private SysDeptService deptService;
 
     /**
      * 根据条件分页查询用户列表
@@ -68,7 +60,7 @@ public class SysUserService{
      * @return 用户信息集合信息
      */
 
-    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE,selfFieldGroup = FieldGroup.REJECT)
+    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE, selfFieldGroup = FieldGroup.REJECT)
     public List<SysUser> selectUserList(SysUser user) {
         return userMapper.selectUserList(user);
     }
@@ -80,7 +72,7 @@ public class SysUserService{
      * @return 用户信息集合信息
      */
 
-    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE,selfFieldGroup = FieldGroup.REJECT)
+    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE, selfFieldGroup = FieldGroup.REJECT)
     public List<SysUser> selectAllocatedList(SysUser user) {
         return userMapper.selectAllocatedList(user);
     }
@@ -92,7 +84,7 @@ public class SysUserService{
      * @return 用户信息集合信息
      */
 
-    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE,selfFieldGroup = FieldGroup.REJECT)
+    @DataScope(tableAlias = "d", deptFieldGroup = FieldGroup.SYS_DEPT_CODE, selfFieldGroup = FieldGroup.REJECT)
     public List<SysUser> selectUnallocatedList(SysUser user) {
         return userMapper.selectUnallocatedList(user);
     }

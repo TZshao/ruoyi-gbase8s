@@ -13,7 +13,7 @@ import java.util.List;
  * @author hfits
  */
 @Service
-public class SysLogininforService{
+public class SysLogininforService {
 
     @Autowired
     private SysLogininforMapper logininforMapper;

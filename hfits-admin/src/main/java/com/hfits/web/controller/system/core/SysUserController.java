@@ -234,7 +234,8 @@ public class SysUserController extends BaseController {
         AjaxResult ajax = AjaxResult.success();
         ajax.put("depts", deptService.selectDeptTreeList(new SysDept()));
         SysUser user = userService.selectUserDataScope(userId);
-        ajax.put("checkedKeys", user != null && user.getAuthDeptCodes() != null ? java.util.Arrays.asList(user.getAuthDeptCodes()) : Collections.emptyList());
+        ajax.put("checkedKeys", user != null
+                && user.getAuthDeptCodes() != null ? java.util.Arrays.asList(user.getAuthDeptCodes()) : Collections.emptyList());
         return ajax;
     }
 

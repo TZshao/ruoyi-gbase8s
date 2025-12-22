@@ -21,8 +21,7 @@ import org.springframework.stereotype.Service;
  * @author hfits
  */
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService
-{
+public class UserDetailsServiceImpl implements UserDetailsService {
     private static final Logger log = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
     @Autowired
@@ -35,21 +34,15 @@ public class UserDetailsServiceImpl implements UserDetailsService
     private SysPermissionService permissionService;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
-    {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         SysUser user = userService.selectUserByUserName(username);
-        if (StringUtils.isNull(user))
-        {
+        if (StringUtils.isNull(user)) {
             log.info("登录用户：{} 不存在.", username);
             throw new ServiceException(MessageUtils.message("user.not.exists"));
-        }
-        else if (UserStatus.DELETED.getCode().equals(user.getDelFlag()))
-        {
+        } else if (UserStatus.DELETED.getCode().equals(user.getDelFlag())) {
             log.info("登录用户：{} 已被删除.", username);
             throw new ServiceException(MessageUtils.message("user.password.delete"));
-        }
-        else if (UserStatus.DISABLE.getCode().equals(user.getStatus()))
-        {
+        } else if (UserStatus.DISABLE.getCode().equals(user.getStatus())) {
             log.info("登录用户：{} 已被停用.", username);
             throw new ServiceException(MessageUtils.message("user.blocked"));
         }
@@ -59,12 +52,10 @@ public class UserDetailsServiceImpl implements UserDetailsService
         return createLoginUser(user);
     }
 
-    public UserDetails createLoginUser(SysUser user)
-    {
+    public UserDetails createLoginUser(SysUser user) {
         // 补充数据权限部门编码，避免后续再次查询
         SysUser dataScopeUser = userService.selectUserDataScope(user.getUserId());
-        if (dataScopeUser != null && dataScopeUser.getAuthDeptCodes() != null)
-        {
+        if (dataScopeUser != null && dataScopeUser.getAuthDeptCodes() != null) {
             user.setAuthDeptCodes(dataScopeUser.getAuthDeptCodes());
         }
         return new LoginUser(user.getUserId(), user.getDeptId(), user, permissionService.getMenuPermission(user));

@@ -1,19 +1,11 @@
 package com.hfits.common.core.controller;
 
-import java.beans.PropertyEditorSupport;
-import java.util.Date;
-import java.util.List;
-
-import com.hfits.common.core.domain.Resp;
-import com.hfits.common.core.domain.entity.SysUser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.hfits.common.constant.HttpStatus;
 import com.hfits.common.core.domain.AjaxResult;
+import com.hfits.common.core.domain.Resp;
+import com.hfits.common.core.domain.entity.SysUser;
 import com.hfits.common.core.domain.model.LoginUser;
 import com.hfits.common.core.page.PageDomain;
 import com.hfits.common.core.page.TableDataInfo;
@@ -23,6 +15,14 @@ import com.hfits.common.utils.PageUtils;
 import com.hfits.common.utils.SecurityUtils;
 import com.hfits.common.utils.StringUtils;
 import com.hfits.common.utils.sql.SqlUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+
+import java.beans.PropertyEditorSupport;
+import java.util.Date;
+import java.util.List;
 
 /**
  * web层通用数据处理
@@ -178,6 +178,7 @@ public class BaseController {
 
     /**
      * 返回成功消息
+     *
      * @deprecated 请使用 {@link #successR(String)} 方法
      */
     @Deprecated
@@ -187,6 +188,7 @@ public class BaseController {
 
     /**
      * 返回成功消息
+     *
      * @deprecated 请使用 {@link #successR(Object)} 方法
      */
     @Deprecated
@@ -196,6 +198,7 @@ public class BaseController {
 
     /**
      * 返回失败消息
+     *
      * @deprecated 请使用 {@link #errorR(String)} 方法
      */
     @Deprecated
@@ -205,6 +208,7 @@ public class BaseController {
 
     /**
      * 返回警告消息
+     *
      * @deprecated 请使用 {@link #warnR(String)} 方法
      */
     @Deprecated
@@ -215,9 +219,9 @@ public class BaseController {
     /**
      * 响应返回结果
      *
-     * @deprecated 请使用 {@link #toAjaxR(int)} 方法
      * @param rows 影响行数
      * @return 操作结果
+     * @deprecated 请使用 {@link #toAjaxR(int)} 方法
      */
     @Deprecated
     protected AjaxResult toAjax(int rows) {
@@ -227,9 +231,9 @@ public class BaseController {
     /**
      * 响应返回结果
      *
-     * @deprecated 请使用 {@link #toAjaxR(boolean)} 方法
      * @param result 结果
      * @return 操作结果
+     * @deprecated 请使用 {@link #toAjaxR(boolean)} 方法
      */
     @Deprecated
     protected AjaxResult toAjax(boolean result) {
@@ -249,6 +253,7 @@ public class BaseController {
     public LoginUser getLoginUser() {
         return SecurityUtils.getLoginUser();
     }
+
     /**
      * 获取用户缓存信息
      */

@@ -10,10 +10,14 @@ import java.io.Serializable;
 public class FieldMapping implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    /** 源表字段名 */
+    /**
+     * 源表字段名
+     */
     private String sourceField;
 
-    /** 目标实体类字段名 */
+    /**
+     * 目标实体类字段名
+     */
     private String targetField;
 
     public FieldMapping() {

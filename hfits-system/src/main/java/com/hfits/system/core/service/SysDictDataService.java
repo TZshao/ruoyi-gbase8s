@@ -15,10 +15,14 @@ import java.util.List;
  * @author hfits
  */
 @Service
-public class SysDictDataService{
+public class SysDictDataService {
+    public static final String PREFIX = "ref@";
+    public static final Integer TABLE_INDEX = 0;
+    public static final Integer VALUE_INDEX = 1;
+    public static final Integer LABEL_INDEX = 2;
+
     @Autowired
     private SysDictDataMapper dictDataMapper;
-    public static final String PREFIX = "ref@";
 
     /**
      * 根据条件分页查询字典数据
@@ -29,9 +33,10 @@ public class SysDictDataService{
 
     public List<SysDictData> selectDictDataList(SysDictData dictData) {
         String dictType = dictData.getDictType();
-        if (StringUtils.isNotEmpty(dictType)&& dictType.startsWith(PREFIX)) {
+        if (StringUtils.isNotEmpty(dictType) && dictType.startsWith(PREFIX)) {
             String[] tableKeyLabel = dictType.substring(dictType.indexOf(PREFIX) + PREFIX.length()).split(",");
-            List<SysDictData> sysDictData = dictDataMapper.selectKeyLableFromTable(tableKeyLabel[0], tableKeyLabel[1], tableKeyLabel[2]);
+            List<SysDictData> sysDictData = dictDataMapper.selectKeyLableFromTable(
+                    tableKeyLabel[TABLE_INDEX], tableKeyLabel[VALUE_INDEX], tableKeyLabel[LABEL_INDEX]);
             return sysDictData;
         }
         return dictDataMapper.selectDictDataList(dictData);

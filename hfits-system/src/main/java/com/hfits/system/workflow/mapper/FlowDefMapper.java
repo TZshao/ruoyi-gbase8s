@@ -1,19 +1,20 @@
 package com.hfits.system.workflow.mapper;
 
-import java.util.List;
 import com.hfits.system.workflow.domain.FlowDef;
+
+import java.util.List;
 
 /**
  * 流程定义Mapper接口
  */
-public interface FlowDefMapper
-{
+public interface FlowDefMapper {
     FlowDef selectFlowDefById(Long id);
 
     List<FlowDef> selectFlowDefList(FlowDef flowDef);
 
     /**
      * 根据flowCode查询流程定义列表（全部版本）
+     *
      * @param flowCode 流程编号
      * @return 流程定义列表
      */

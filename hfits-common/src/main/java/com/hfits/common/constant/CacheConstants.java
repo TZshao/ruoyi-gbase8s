@@ -5,8 +5,10 @@ package com.hfits.common.constant;
  *
  * @author hfits
  */
-public class CacheConstants
-{
+public final class CacheConstants {
+    private CacheConstants() {
+
+    }
     /**
      * 登录用户 redis key
      */

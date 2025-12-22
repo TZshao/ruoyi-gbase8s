@@ -4,10 +4,8 @@ package com.hfits.common.enums;
  * 操作状态
  *
  * @author hfits
- *
  */
-public enum BusinessStatus
-{
+public enum BusinessStatus {
     /**
      * 成功
      */

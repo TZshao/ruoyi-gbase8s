@@ -1,19 +1,5 @@
 package com.hfits.web.controller.system.flow;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.hfits.system.workflow.domain.FlowDef;
-import com.hfits.system.workflow.service.FlowDefService;
 import com.hfits.common.annotation.log.Module;
 import com.hfits.common.annotation.log.PostMappingLog;
 import com.hfits.common.annotation.log.PutMappingLog;
@@ -21,6 +7,14 @@ import com.hfits.common.core.controller.BaseController;
 import com.hfits.common.core.domain.Resp;
 import com.hfits.common.core.page.TableDataInfo;
 import com.hfits.common.enums.BusinessType;
+import com.hfits.system.workflow.domain.FlowDef;
+import com.hfits.system.workflow.service.FlowDefService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 流程定义管理
@@ -42,7 +36,8 @@ public class FlowDefinitionController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('flow:def:query')")
     @GetMapping("/listByFlowCode")
-    public Resp<List<FlowDef>> listByFlowCode(@RequestParam String flowCode, @RequestParam(required = false, defaultValue = "false") boolean latestPublished) {
+    public Resp<List<FlowDef>> listByFlowCode(@RequestParam String flowCode,
+                                              @RequestParam(required = false, defaultValue = "false") boolean latestPublished) {
         List<FlowDef> list = flowDefService.listByFlowCode(flowCode, latestPublished);
         return successR(list);
     }

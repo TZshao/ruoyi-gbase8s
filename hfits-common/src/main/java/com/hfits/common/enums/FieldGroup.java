@@ -22,20 +22,13 @@ public enum FieldGroup {
     PROJ_SELF(
             Fields.PROJ_CJR,
             Fields.SP_EXIST_CJR
-    ),
-    ;
-
-
+    );
 
 
     private final String[] fields;
 
     FieldGroup(String... fields) {
         this.fields = fields;
-    }
-
-    public String[] getFields() {
-        return fields;
     }
 
     /**
@@ -45,7 +38,7 @@ public enum FieldGroup {
      * @return SQL 模板，如果不存在则返回 null
      */
     public static String getSqlTemplate(String fieldCode) {
-        return Fields.sqlMap.get(fieldCode);
+        return Fields.SQL_MAP.get(fieldCode);
     }
 
     /**
@@ -55,7 +48,11 @@ public enum FieldGroup {
      * @return 是否为特殊字段
      */
     public static boolean isSpecialField(String fieldCode) {
-        return Fields.sqlMap.containsKey(fieldCode);
+        return Fields.SQL_MAP.containsKey(fieldCode);
+    }
+
+    public String[] getFields() {
+        return fields;
     }
 }
 
@@ -76,7 +73,7 @@ class Fields {
 
 
     // 如果特殊字段需要不同的sql模板（如不同子表），还可以这样实现，
-    public static final Map<String, String> sqlMap = Map.of(
+    public static final Map<String, String> SQL_MAP = Map.of(
             SP_EXIST_FZDW,
             """
                     exists (select 1 from jdb, zrdwb

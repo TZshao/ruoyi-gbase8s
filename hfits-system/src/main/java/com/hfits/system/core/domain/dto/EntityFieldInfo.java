@@ -10,16 +10,24 @@ import java.io.Serializable;
 public class EntityFieldInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    /** 字段名 */
+    /**
+     * 字段名
+     */
     private String fieldName;
 
-    /** 字段类型 */
+    /**
+     * 字段类型
+     */
     private String fieldType;
 
-    /** 是否必填 */
+    /**
+     * 是否必填
+     */
     private Boolean required;
 
-    /** 字段描述 */
+    /**
+     * 字段描述
+     */
     private String description;
 
     public EntityFieldInfo() {

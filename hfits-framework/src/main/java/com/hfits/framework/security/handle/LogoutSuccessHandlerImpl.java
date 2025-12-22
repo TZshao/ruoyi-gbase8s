@@ -1,13 +1,5 @@
 package com.hfits.framework.security.handle;
 
-import java.io.IOException;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import com.alibaba.fastjson2.JSON;
 import com.hfits.common.constant.Constants;
 import com.hfits.common.core.domain.AjaxResult;
@@ -18,6 +10,15 @@ import com.hfits.common.utils.StringUtils;
 import com.hfits.framework.manager.AsyncManager;
 import com.hfits.framework.manager.factory.AsyncFactory;
 import com.hfits.framework.web.service.TokenService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+
+import java.io.IOException;
 
 /**
  * 自定义退出处理类 返回成功
@@ -25,8 +26,7 @@ import com.hfits.framework.web.service.TokenService;
  * @author hfits
  */
 @Configuration
-public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler
-{
+public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
     @Autowired
     private TokenService tokenService;
 
@@ -37,11 +37,9 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler
      */
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
-            throws IOException, ServletException
-    {
+            throws IOException, ServletException {
         LoginUser loginUser = tokenService.getLoginUser(request);
-        if (StringUtils.isNotNull(loginUser))
-        {
+        if (StringUtils.isNotNull(loginUser)) {
             String userName = loginUser.getUsername();
             // 删除用户缓存记录
             tokenService.delLoginUser(loginUser.getToken());

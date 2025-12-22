@@ -5,8 +5,7 @@ package com.hfits.common.enums;
  *
  * @author hfits
  */
-public enum DataSourceType
-{
+public enum DataSourceType {
     /**
      * 主库
      */

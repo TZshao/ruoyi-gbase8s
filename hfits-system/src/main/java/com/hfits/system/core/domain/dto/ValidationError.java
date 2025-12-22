@@ -11,22 +11,31 @@ import java.util.Map;
 public class ValidationError implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    /** 行号（从1开始） */
+    /**
+     * 行号（从1开始）
+     */
     private Integer rowNumber;
 
-    /** 源数据 */
+    /**
+     * 源数据
+     */
     private Map<String, Object> sourceData;
 
-    /** 错误原因 */
+    /**
+     * 错误原因
+     */
     private String errorMessage;
 
-    /** 异常类型 */
+    /**
+     * 异常类型
+     */
     private String exceptionType;
 
     public ValidationError() {
     }
 
-    public ValidationError(Integer rowNumber, Map<String, Object> sourceData, String errorMessage, String exceptionType) {
+    public ValidationError(Integer rowNumber, Map<String, Object> sourceData,
+                           String errorMessage, String exceptionType) {
         this.rowNumber = rowNumber;
         this.sourceData = sourceData;
         this.errorMessage = errorMessage;

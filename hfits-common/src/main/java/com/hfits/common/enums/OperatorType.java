@@ -5,8 +5,7 @@ package com.hfits.common.enums;
  *
  * @author hfits
  */
-public enum OperatorType
-{
+public enum OperatorType {
     /**
      * 其它
      */

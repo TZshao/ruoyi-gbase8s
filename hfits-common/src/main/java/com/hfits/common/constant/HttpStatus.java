@@ -5,8 +5,9 @@ package com.hfits.common.constant;
  *
  * @author hfits
  */
-public class HttpStatus
-{
+public final class HttpStatus {
+    private HttpStatus() {
+    }
     /**
      * 操作成功
      */

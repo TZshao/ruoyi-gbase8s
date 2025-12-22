@@ -16,23 +16,18 @@ import java.util.List;
  * 不要让业务模型入侵权限模型：这里不应该出现，某个具体的表，或者具体的字段
  */
 public final class AuthUtil {
-    private static final Logger logger = LoggerFactory.getLogger(AuthUtil.class);
-
     public static final String DATA_SCOPE = "dataScope";
     //全部数据权限
     public static final String DATA_SCOPE_ALL = "1";
-
     //自定部门数据权限
     public static final String DATA_SCOPE_CUSTOM = "2";
-
     //本部门数据权限
     public static final String DATA_SCOPE_DEPT = "3";
-
     //本部门及以下数据权限
     public static final String DATA_SCOPE_DEPT_AND_CHILD = "4";
-
     //仅本人数据权限
     public static final String DATA_SCOPE_SELF = "5";
+    private static final Logger logger = LoggerFactory.getLogger(AuthUtil.class);
 
 
     private AuthUtil() {

@@ -1,9 +1,9 @@
 package com.hfits.system.workflow.domain;
 
+import com.hfits.common.core.domain.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import com.hfits.common.core.domain.BaseEntity;
 
 /**
  * 流程定义

@@ -1,10 +1,10 @@
 package com.hfits.system.core.mapper;
 
-import java.util.List;
-
+import com.hfits.system.core.domain.ApiLog;
 import com.hfits.system.core.domain.vo.ApiStatis;
 import org.apache.ibatis.annotations.Param;
-import com.hfits.system.core.domain.ApiLog;
+
+import java.util.List;
 
 /**
  * API接口统计记录 数据层
@@ -13,18 +13,20 @@ import com.hfits.system.core.domain.ApiLog;
  */
 public interface ApiLogMapper {
 
-    public void insertApiLog(ApiLog record);
-    public int cleanErrors();
-    public int deleteOldLog(@Param("keepCount") int keepCount);
+    void insertApiLog(ApiLog record);
+
+    int cleanErrors();
+
+    int deleteOldLog(@Param("keepCount") int keepCount);
 
 
-    public List<ApiLog> selectApiLogList(@Param("apiKey") String apiKey, @Param("limit") Integer limit);
+    List<ApiLog> selectApiLogList(@Param("apiKey") String apiKey, @Param("limit") Integer limit);
 
-    public List<ApiStatis> selectStatis();
+    List<ApiStatis> selectStatis();
 
-    public List<ApiStatis> selectStatisAfter(@Param("date") String date);
+    List<ApiStatis> selectStatisAfter(@Param("date") String date);
 
-    public List<ApiStatis> selectErrorApiList();
+    List<ApiStatis> selectErrorApiList();
 
 }
 

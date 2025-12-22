@@ -1,15 +1,15 @@
 package com.hfits.generator.mapper;
 
-import java.util.List;
 import com.hfits.generator.domain.GenTableColumn;
+
+import java.util.List;
 
 /**
  * 业务字段 数据层
  *
  * @author hfits
  */
-public interface GenTableColumnMapper
-{
+public interface GenTableColumnMapper {
     /**
      * 根据表名称查询列信息
      *

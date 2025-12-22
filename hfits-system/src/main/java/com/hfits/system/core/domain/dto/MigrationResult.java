@@ -11,19 +11,29 @@ import java.util.List;
 public class MigrationResult implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    /** 总数据量 */
+    /**
+     * 总数据量
+     */
     private Integer totalCount;
 
-    /** 成功数量 */
+    /**
+     * 成功数量
+     */
     private Integer successCount;
 
-    /** 失败数量 */
+    /**
+     * 失败数量
+     */
     private Integer failureCount;
 
-    /** 错误详情 */
+    /**
+     * 错误详情
+     */
     private List<String> errorDetails;
 
-    /** 消息 */
+    /**
+     * 消息
+     */
     private String message;
 
     public MigrationResult() {

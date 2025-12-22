@@ -18,13 +18,13 @@ import java.util.stream.Collectors;
  * @author hfits
  */
 @Service
-public class ApiStatisticsService{
+public class ApiStatisticsService {
     /**
      * 每个接口保留的记录数
      */
     private static final int MAX_RECORDS_PER_API = 1000;
     private static final String[] SYSTEM_API_PREFIX =
-            {"/system", "/login", "/monitor", "/getInfo", "/getRouters","/captchaImage"};
+            {"/system", "/login", "/monitor", "/getInfo", "/getRouters", "/captchaImage"};
 
     @Autowired
     private ApiLogMapper mapper;
@@ -48,7 +48,7 @@ public class ApiStatisticsService{
      */
 
     public List<ApiLog> getLogList(String apiKey, Integer limit) {
-        return mapper.selectApiLogList(apiKey,limit);
+        return mapper.selectApiLogList(apiKey, limit);
     }
 
 
@@ -63,8 +63,8 @@ public class ApiStatisticsService{
     public List<ApiStatis> getSlowApiList(boolean includeSystem, int limit) {
         List<ApiStatis> apiStatis = mapper.selectStatis();
         return apiStatis.stream()
-                .filter(item -> includeSystem ||
-                        (Arrays.stream(SYSTEM_API_PREFIX).noneMatch(item.getApiKey()::contains)))
+                .filter(item -> includeSystem
+                        || (Arrays.stream(SYSTEM_API_PREFIX).noneMatch(item.getApiKey()::contains)))
                 .sorted((a, b) -> {
                     double avgA = a.getAvgResponseTime() != null ? a.getAvgResponseTime() : 0.0;
                     double avgB = b.getAvgResponseTime() != null ? b.getAvgResponseTime() : 0.0;
@@ -97,8 +97,8 @@ public class ApiStatisticsService{
         }
 
         return apiStatis.stream()
-                .filter(item -> includeSystem ||
-                        (Arrays.stream(SYSTEM_API_PREFIX).noneMatch(item.getApiKey()::contains)))
+                .filter(item -> includeSystem
+                        || (Arrays.stream(SYSTEM_API_PREFIX).noneMatch(item.getApiKey()::contains)))
                 .sorted((a, b) -> {
                     long countA = a.getTotalCount() != null ? a.getTotalCount() : 0L;
                     long countB = b.getTotalCount() != null ? b.getTotalCount() : 0L;
@@ -119,8 +119,8 @@ public class ApiStatisticsService{
     public List<ApiStatis> getErrorApiList(boolean includeSystem, int limit) {
         List<ApiStatis> apiStatis = mapper.selectErrorApiList();
         return apiStatis.stream()
-                .filter(item -> includeSystem ||
-                        (Arrays.stream(SYSTEM_API_PREFIX).noneMatch(item.getApiKey()::contains)))
+                .filter(item -> includeSystem
+                        || (Arrays.stream(SYSTEM_API_PREFIX).noneMatch(item.getApiKey()::contains)))
                 .sorted((a, b) -> {
                     long errorA = a.getErrorCount() != null ? a.getErrorCount() : 0L;
                     long errorB = b.getErrorCount() != null ? b.getErrorCount() : 0L;

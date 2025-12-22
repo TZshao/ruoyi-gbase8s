@@ -1,12 +1,5 @@
 package com.hfits.framework.manager.factory;
 
-import java.util.TimerTask;
-
-import com.hfits.system.core.service.ApiStatisticsService;
-import com.hfits.system.core.service.SysLogininforService;
-import com.hfits.system.core.service.SysOperLogService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.hfits.common.constant.Constants;
 import com.hfits.common.utils.LogUtils;
 import com.hfits.common.utils.ServletUtils;
@@ -18,6 +11,13 @@ import com.hfits.common.utils.spring.SpringUtils;
 import com.hfits.system.core.domain.ApiLog;
 import com.hfits.system.core.domain.SysLogininfor;
 import com.hfits.system.core.domain.SysOperLog;
+import com.hfits.system.core.service.ApiStatisticsService;
+import com.hfits.system.core.service.SysLogininforService;
+import com.hfits.system.core.service.SysOperLogService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.TimerTask;
 
 /**
  * 异步工厂（产生任务用）
@@ -25,7 +25,7 @@ import com.hfits.system.core.domain.SysOperLog;
  * @author hfits
  */
 public class AsyncFactory {
-    private static final Logger sys_user_logger = LoggerFactory.getLogger("sys-user");
+    private static final Logger logger = LoggerFactory.getLogger("sys-user");
 
     /**
      * 记录登录信息
@@ -51,7 +51,7 @@ public class AsyncFactory {
                 s.append(LogUtils.getBlock(status));
                 s.append(LogUtils.getBlock(message));
                 // 打印信息到日志
-                sys_user_logger.info(s.toString(), args);
+                logger.info(s.toString(), args);
                 // 获取客户端操作系统
                 String os = UserAgentUtils.getOperatingSystem(userAgent);
                 // 获取客户端浏览器

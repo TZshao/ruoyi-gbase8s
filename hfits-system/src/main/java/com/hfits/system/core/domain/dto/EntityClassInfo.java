@@ -10,10 +10,14 @@ import java.io.Serializable;
 public class EntityClassInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    /** 类名 */
+    /**
+     * 类名
+     */
     private String className;
 
-    /** 全限定名 */
+    /**
+     * 全限定名
+     */
     private String fullClassName;
 
     public EntityClassInfo() {

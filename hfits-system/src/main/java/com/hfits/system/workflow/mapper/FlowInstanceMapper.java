@@ -1,13 +1,13 @@
 package com.hfits.system.workflow.mapper;
 
-import java.util.List;
 import com.hfits.system.workflow.domain.FlowInstance;
+
+import java.util.List;
 
 /**
  * 流程实例Mapper接口
  */
-public interface FlowInstanceMapper
-{
+public interface FlowInstanceMapper {
     FlowInstance selectFlowInstanceById(Long id);
 
     List<FlowInstance> selectFlowInstanceList(FlowInstance flowInstance);

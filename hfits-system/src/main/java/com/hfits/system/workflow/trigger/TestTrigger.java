@@ -1,37 +1,24 @@
 package com.hfits.system.workflow.trigger;
 
 import com.hfits.system.workflow.domain.FlowInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TestTrigger implements FlowTrigger {
+    private static final Logger log = LoggerFactory.getLogger(TestTrigger.class);
 
     public void pass(FlowInstance instance) {
-        aaa("pass");
-        System.out.println(instance);
-        aaa("pass");
+        log.info("{}", instance);
     }
 
     public void reject(FlowInstance instance) {
-        aaa("reject");
-        System.out.println(instance);
-        aaa("reject");
+        log.info("{}", instance);
     }
 
     public void closed(FlowInstance instance) {
-        aaa("closed");
-        System.out.println(instance);
-        aaa("closed");
+        log.info("{}", instance);
     }
 
-    private void aaa(String s) {
-        String ss = "";
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 5; j++) {
-                ss += s;
-            }
-            ss += "\n";
-        }
-        System.out.println(ss);
-    }
 }

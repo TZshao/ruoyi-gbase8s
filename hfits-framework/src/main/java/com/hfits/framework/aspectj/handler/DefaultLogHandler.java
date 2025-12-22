@@ -2,9 +2,9 @@ package com.hfits.framework.aspectj.handler;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.hfits.common.annotation.log.Log;
+import com.hfits.common.enums.BusinessType;
 import com.hfits.common.interfaces.LogHandler;
 import com.hfits.common.interfaces.LogMapper;
-import com.hfits.common.enums.BusinessType;
 import com.hfits.common.utils.reflect.ReflectUtils;
 import com.hfits.common.utils.spring.SpringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,8 +51,8 @@ public class DefaultLogHandler implements LogHandler {
     @Override
     public JSONObject recodeAfterValue(Log log, Object[] args, String[] parameterNames) {
         JSONObject result = new JSONObject();
-        if (log == null || log.mapper().equals(LogMapper.class) ||
-            log.businessType().equals(BusinessType.DELETE)) {
+        if (log == null || log.mapper().equals(LogMapper.class)
+                || log.businessType().equals(BusinessType.DELETE)) {
             return result;
         }
 
@@ -63,10 +63,10 @@ public class DefaultLogHandler implements LogHandler {
      * 获取实体值的公共方法
      * 提取公共逻辑，消除代码重复
      *
-     * @param log 日志注解
-     * @param args 方法参数值数组
+     * @param log            日志注解
+     * @param args           方法参数值数组
      * @param parameterNames 方法参数名数组
-     * @param operationType 操作类型（用于日志）
+     * @param operationType  操作类型（用于日志）
      * @return 实体值的JSONObject
      */
     private JSONObject getEntityValue(Log log, Object[] args, String[] parameterNames, String operationType) {
@@ -130,8 +130,8 @@ public class DefaultLogHandler implements LogHandler {
      * 根据idName从参数中获取ID值
      * 支持简单参数名（如：id）和嵌套属性（如：paramDto.id）
      *
-     * @param idName ID参数名，可以是简单参数名或嵌套属性路径
-     * @param args 方法参数值数组
+     * @param idName         ID参数名，可以是简单参数名或嵌套属性路径
+     * @param args           方法参数值数组
      * @param parameterNames 方法参数名数组
      * @return ID值，如果未找到返回null
      */
@@ -173,7 +173,7 @@ public class DefaultLogHandler implements LogHandler {
     /**
      * 查找参数在parameterNames中的索引位置
      *
-     * @param paramName 参数名
+     * @param paramName      参数名
      * @param parameterNames 参数名数组
      * @return 索引位置，未找到返回-1
      */

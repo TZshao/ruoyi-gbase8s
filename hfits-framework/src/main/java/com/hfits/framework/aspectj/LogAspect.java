@@ -1,12 +1,24 @@
 package com.hfits.framework.aspectj;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.hfits.common.annotation.log.Log;
+import com.hfits.common.annotation.log.Module;
+import com.hfits.common.core.domain.entity.SysUser;
+import com.hfits.common.core.domain.model.LoginUser;
+import com.hfits.common.core.text.Convert;
+import com.hfits.common.enums.BusinessStatus;
+import com.hfits.common.enums.HttpMethod;
 import com.hfits.common.interfaces.LogHandler;
+import com.hfits.common.utils.ExceptionUtil;
+import com.hfits.common.utils.SecurityUtils;
+import com.hfits.common.utils.ServletUtils;
+import com.hfits.common.utils.StringUtils;
+import com.hfits.common.utils.ip.IpUtils;
 import com.hfits.framework.aspectj.handler.DefaultLogHandler;
+import com.hfits.framework.manager.AsyncManager;
+import com.hfits.framework.manager.factory.AsyncFactory;
+import com.hfits.system.core.domain.SysOperLog;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,21 +36,10 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
-import com.alibaba.fastjson2.JSON;
-import com.hfits.common.annotation.log.Log;
-import com.hfits.common.annotation.log.Module;
-import com.hfits.common.core.domain.entity.SysUser;
-import com.hfits.common.core.domain.model.LoginUser;
-import com.hfits.common.core.text.Convert;
-import com.hfits.common.enums.BusinessStatus;
-import com.hfits.common.enums.HttpMethod;
-import com.hfits.common.utils.ExceptionUtil;
-import com.hfits.common.utils.ServletUtils;
-import com.hfits.common.utils.StringUtils;
-import com.hfits.common.utils.ip.IpUtils;
-import com.hfits.framework.manager.AsyncManager;
-import com.hfits.framework.manager.factory.AsyncFactory;
-import com.hfits.system.core.domain.SysOperLog;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 操作日志记录处理
@@ -49,10 +50,18 @@ import com.hfits.system.core.domain.SysOperLog;
 @Component
 public class LogAspect {
     private static final Logger log = LoggerFactory.getLogger(LogAspect.class);
-
+    /**
+     * 计算操作消耗时间
+     */
+    private static final ThreadLocal<Long> TIME_THREADLOCAL = new NamedThreadLocal<Long>("Cost Time");
+    private static final ThreadLocal<JSONObject> BEFORE_THREADLOCAL = new NamedThreadLocal<JSONObject>("beforeEntity");
+    /**
+     * 参数最大长度限制
+     */
+    private static final int PARAM_MAX_LENGTH = 2000;
+    private final Map<Class<?>, LogHandler> handlerMap = new ConcurrentHashMap<Class<?>, LogHandler>();
     @Autowired
     private LogHandler[] handlers;
-    private final Map<Class<?>, LogHandler> handlerMap = new ConcurrentHashMap<Class<?>, LogHandler>();
 
     @PostConstruct
     public void init() {
@@ -63,24 +72,13 @@ public class LogAspect {
     }
 
     /**
-     * 计算操作消耗时间
-     */
-    private static final ThreadLocal<Long> TIME_THREADLOCAL = new NamedThreadLocal<Long>("Cost Time");
-    private static final ThreadLocal<JSONObject> BEFORE_THREADLOCAL = new NamedThreadLocal<JSONObject>("beforeEntity");
-
-    /**
-     * 参数最大长度限制
-     */
-    private static final int PARAM_MAX_LENGTH = 2000;
-
-    /**
      * 处理请求前执行
      * 支持复合注解（如 @PostMappingLog、@DeleteMappingLog、@PutMappingLog 等）
      */
-    @Before(value = "@annotation(com.hfits.common.annotation.log.Log) || " +
-                     "@annotation(com.hfits.common.annotation.log.PostMappingLog) || " +
-                     "@annotation(com.hfits.common.annotation.log.DeleteMappingLog) || " +
-                     "@annotation(com.hfits.common.annotation.log.PutMappingLog)")
+    @Before(value = "@annotation(com.hfits.common.annotation.log.Log) " +
+            "|| @annotation(com.hfits.common.annotation.log.PostMappingLog)" +
+            "|| @annotation(com.hfits.common.annotation.log.DeleteMappingLog) " +
+            "|| @annotation(com.hfits.common.annotation.log.PutMappingLog)")
     public void doBefore(JoinPoint joinPoint) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Log controllerLog = AnnotationUtils.findAnnotation(signature.getMethod(), Log.class);
@@ -89,7 +87,7 @@ public class LogAspect {
         }
         LogHandler handler = getHandler(controllerLog.logHandler());
         //这里signature.getParameterNames依赖于编译参数 -parameters 保留方法原始参数名称，避免 arg0，arg1的情况
-        BEFORE_THREADLOCAL.set(handler.recordPreValue(controllerLog, joinPoint.getArgs(),signature.getParameterNames()));
+        BEFORE_THREADLOCAL.set(handler.recordPreValue(controllerLog, joinPoint.getArgs(), signature.getParameterNames()));
         TIME_THREADLOCAL.set(System.currentTimeMillis());
     }
 
@@ -99,11 +97,10 @@ public class LogAspect {
      *
      * @param joinPoint 切点
      */
-    @AfterReturning(pointcut = "@annotation(com.hfits.common.annotation.log.Log) || " +
-                                "@annotation(com.hfits.common.annotation.log.PostMappingLog) || " +
-                                "@annotation(com.hfits.common.annotation.log.DeleteMappingLog) || " +
-                                "@annotation(com.hfits.common.annotation.log.PutMappingLog)",
-                    returning = "jsonResult")
+    @AfterReturning(pointcut = "@annotation(com.hfits.common.annotation.log.Log) " +
+            "|| @annotation(com.hfits.common.annotation.log.PostMappingLog) " +
+            "|| @annotation(com.hfits.common.annotation.log.DeleteMappingLog) " +
+            "|| @annotation(com.hfits.common.annotation.log.PutMappingLog)", returning = "jsonResult")
     public void doAfterReturning(JoinPoint joinPoint, Object jsonResult) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Log controllerLog = AnnotationUtils.findAnnotation(signature.getMethod(), Log.class);
@@ -119,11 +116,10 @@ public class LogAspect {
      * @param joinPoint 切点
      * @param e         异常
      */
-    @AfterThrowing(value = "@annotation(com.hfits.common.annotation.log.Log) || " +
-                            "@annotation(com.hfits.common.annotation.log.PostMappingLog) || " +
-                            "@annotation(com.hfits.common.annotation.log.DeleteMappingLog) || " +
-                            "@annotation(com.hfits.common.annotation.log.PutMappingLog)",
-                    throwing = "e")
+    @AfterThrowing(value = "@annotation(com.hfits.common.annotation.log.Log) " +
+            "|| @annotation(com.hfits.common.annotation.log.PostMappingLog) " +
+            "|| @annotation(com.hfits.common.annotation.log.DeleteMappingLog) " +
+            "|| @annotation(com.hfits.common.annotation.log.PutMappingLog)", throwing = "e")
     public void doAfterThrowing(JoinPoint joinPoint, Exception e) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Log controllerLog = AnnotationUtils.findAnnotation(signature.getMethod(), Log.class);
@@ -132,11 +128,12 @@ public class LogAspect {
         }
     }
 
+    public static final Integer MAX_URL_LENGTH = 255;
+    public static final Integer MAX_ERROR_LENGTH = 2000;
     protected void handleLog(final JoinPoint joinPoint, Log controllerLog, final Exception e, Object jsonResult) {
         try {
             // 获取当前的用户
-//           LoginUser loginUser = SecurityUtils.getLoginUser();
-             LoginUser loginUser = null;
+           LoginUser loginUser = SecurityUtils.getLoginUser();
             LogHandler handler = getHandler(controllerLog.logHandler());
 
             // *========数据库日志=========*//
@@ -145,7 +142,7 @@ public class LogAspect {
             // 请求的地址
             String ip = IpUtils.getIpAddr();
             operLog.setOperIp(ip);
-            operLog.setOperUrl(StringUtils.substring(ServletUtils.getRequest().getRequestURI(), 0, 255));
+            operLog.setOperUrl(StringUtils.substring(ServletUtils.getRequest().getRequestURI(), 0, MAX_URL_LENGTH));
             if (loginUser != null) {
                 operLog.setOperName(loginUser.getUsername());
                 SysUser currentUser = loginUser.getUser();
@@ -156,7 +153,8 @@ public class LogAspect {
 
             if (e != null) {
                 operLog.setStatus(BusinessStatus.FAIL.ordinal());
-                operLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
+                operLog.setErrorMsg(StringUtils.substring(
+                        Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, MAX_ERROR_LENGTH));
             }
             // 设置方法名称
             String className = joinPoint.getTarget().getClass().getName();
@@ -209,7 +207,7 @@ public class LogAspect {
         }
         // 是否需要保存response，参数和值
         if (log.isSaveResponseData() && StringUtils.isNotNull(jsonResult)) {
-            operLog.setJsonResult(StringUtils.substring(JSON.toJSONString(jsonResult), 0, 2000));
+            operLog.setJsonResult(StringUtils.substring(JSON.toJSONString(jsonResult), 0, MAX_ERROR_LENGTH));
         }
     }
 
@@ -222,7 +220,8 @@ public class LogAspect {
     private void setRequestValue(JoinPoint joinPoint, SysOperLog operLog, String[] excludeParamNames) throws Exception {
         String requestMethod = operLog.getRequestMethod();
         Map<?, ?> paramsMap = ServletUtils.getParamMap(ServletUtils.getRequest());
-        if (StringUtils.isEmpty(paramsMap) && StringUtils.equalsAny(requestMethod, HttpMethod.PUT.name(), HttpMethod.POST.name(), HttpMethod.DELETE.name())) {
+        if (StringUtils.isEmpty(paramsMap)
+                && StringUtils.equalsAny(requestMethod, HttpMethod.PUT.name(), HttpMethod.POST.name(), HttpMethod.DELETE.name())) {
             String params = argsArrayToString(joinPoint.getArgs());
             operLog.setOperParam(params);
         } else {
@@ -277,7 +276,9 @@ public class LogAspect {
                 return entry.getValue() instanceof MultipartFile;
             }
         }
-        return o instanceof MultipartFile || o instanceof HttpServletRequest || o instanceof HttpServletResponse
+        return o instanceof MultipartFile
+                || o instanceof HttpServletRequest
+                || o instanceof HttpServletResponse
                 || o instanceof BindingResult;
     }
 

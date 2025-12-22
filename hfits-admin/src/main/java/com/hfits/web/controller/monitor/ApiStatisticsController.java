@@ -26,6 +26,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/monitor/api/statistics")
 public class ApiStatisticsController extends BaseController {
+    public static final Integer DEFAULT_SIZE = 10;
+
     @Autowired
     private ApiStatisticsService apiStatisticsService;
 
@@ -39,7 +41,7 @@ public class ApiStatisticsController extends BaseController {
     @GetMapping("/slow")
     public Resp<List<ApiStatis>> getSlowApiList(Boolean includeSystem, Integer limit) {
         boolean include = includeSystem != null && includeSystem;
-        int limitCount = limit != null && limit > 0 ? limit : 10;
+        int limitCount = limit != null && limit > 0 ? limit : DEFAULT_SIZE;
         List<ApiStatis> list = apiStatisticsService.getSlowApiList(include, limitCount);
         return successR(list);
     }
@@ -55,7 +57,7 @@ public class ApiStatisticsController extends BaseController {
     @GetMapping("/frequent")
     public Resp<List<ApiStatis>> getFrequentApiList(Boolean includeSystem, Integer limit, Integer days) {
         boolean include = includeSystem != null && includeSystem;
-        int limitCount = limit != null && limit > 0 ? limit : 10;
+        int limitCount = limit != null && limit > 0 ? limit : DEFAULT_SIZE;
         List<ApiStatis> list = apiStatisticsService.getFrequentApiList(include, limitCount, days);
         return successR(list);
     }
@@ -70,7 +72,7 @@ public class ApiStatisticsController extends BaseController {
     @GetMapping("/error")
     public Resp<List<ApiStatis>> getErrorApiList(Boolean includeSystem, Integer limit) {
         boolean include = includeSystem != null && includeSystem;
-        int limitCount = limit != null && limit > 0 ? limit : 10;
+        int limitCount = limit != null && limit > 0 ? limit : DEFAULT_SIZE;
         List<ApiStatis> list = apiStatisticsService.getErrorApiList(include, limitCount);
         return successR(list);
     }
@@ -82,11 +84,11 @@ public class ApiStatisticsController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('monitor:apiStatistics:query')")
     @GetMapping("/detail")
-    public Resp<List<Map<String, Object>>> getInfo(String apiKey,Integer limit) {
+    public Resp<List<Map<String, Object>>> getInfo(String apiKey, Integer limit) {
         if (StringUtils.isEmpty(apiKey)) {
             return errorR("接口标识不能为空");
         }
-        List<ApiLog> list = apiStatisticsService.getLogList(apiKey,limit);
+        List<ApiLog> list = apiStatisticsService.getLogList(apiKey, limit);
         List<Map<String, Object>> resultMap = new ArrayList<>();
         //忽略无用字段减少数据量
         list.forEach(item ->

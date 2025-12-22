@@ -1,18 +1,19 @@
 package com.hfits.framework.config;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.hfits.common.constant.Constants;
+import com.hfits.common.filter.RefererFilter;
+import com.hfits.common.filter.RepeatableFilter;
+import com.hfits.common.filter.XssFilter;
+import com.hfits.common.utils.StringUtils;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.hfits.common.constant.Constants;
-import com.hfits.common.filter.RefererFilter;
-import com.hfits.common.filter.RepeatableFilter;
-import com.hfits.common.filter.XssFilter;
-import com.hfits.common.utils.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Filter配置
@@ -20,8 +21,7 @@ import com.hfits.common.utils.StringUtils;
  * @author hfits
  */
 @Configuration
-public class FilterConfig
-{
+public class FilterConfig {
     @Value("${xss.excludes}")
     private String excludes;
 
@@ -31,11 +31,10 @@ public class FilterConfig
     @Value("${referer.allowed-domains}")
     private String allowedDomains;
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Bean
     @ConditionalOnProperty(value = "xss.enabled", havingValue = "true")
-    public FilterRegistrationBean xssFilterRegistration()
-    {
+    public FilterRegistrationBean xssFilterRegistration() {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setDispatcherTypes(DispatcherType.REQUEST);
         registration.setFilter(new XssFilter());
@@ -48,11 +47,10 @@ public class FilterConfig
         return registration;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Bean
     @ConditionalOnProperty(value = "referer.enabled", havingValue = "true")
-    public FilterRegistrationBean refererFilterRegistration()
-    {
+    public FilterRegistrationBean refererFilterRegistration() {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setDispatcherTypes(DispatcherType.REQUEST);
         registration.setFilter(new RefererFilter());
@@ -65,10 +63,9 @@ public class FilterConfig
         return registration;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Bean
-    public FilterRegistrationBean someFilterRegistration()
-    {
+    public FilterRegistrationBean someFilterRegistration() {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(new RepeatableFilter());
         registration.addUrlPatterns("/*");

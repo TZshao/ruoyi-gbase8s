@@ -1,5 +1,15 @@
 package com.hfits.system.workflow.service;
 
+import com.hfits.common.utils.DateUtils;
+import com.hfits.system.workflow.domain.FlowInstance;
+import com.hfits.system.workflow.domain.FlowStepDef;
+import com.hfits.system.workflow.mapper.FlowStepDefMapper;
+import com.hfits.system.workflow.trigger.FlowTrigger;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -7,30 +17,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
-
-import com.hfits.system.workflow.domain.FlowInstance;
-import com.hfits.system.workflow.domain.FlowStepDef;
-import com.hfits.system.workflow.trigger.FlowTrigger;
-import com.hfits.common.utils.DateUtils;
-import com.hfits.system.workflow.mapper.FlowStepDefMapper;
-
-import jakarta.annotation.PostConstruct;
-
 /**
  * 流程步骤定义Service业务层处理
  */
 @Service
 public class FlowStepDefService {
+    private final Map<String, List<String>> tiggerMap = new HashMap<>();
     @Autowired
     private FlowStepDefMapper flowStepDefMapper;
-
     @Autowired
     private ApplicationContext applicationContext;
-
-    private final Map<String, List<String>> tiggerMap = new HashMap<>();
 
     @PostConstruct
     public void init() {

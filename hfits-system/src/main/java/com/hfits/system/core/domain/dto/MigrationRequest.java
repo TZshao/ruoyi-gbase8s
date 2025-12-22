@@ -10,27 +10,40 @@ import java.util.List;
  */
 public class MigrationRequest implements Serializable {
     private static final long serialVersionUID = 1L;
+    private static final Integer VALIDATE_LIMIT = 100;
 
-    /** 源表名 */
+    /**
+     * 源表名
+     */
     private String tableName;
 
-    /** 实体类全限定名 */
+    /**
+     * 实体类全限定名
+     */
     private String entityClassName;
 
-    /** Mapper接口全限定名 */
+    /**
+     * Mapper接口全限定名
+     */
     private String mapperClassName;
 
-    /** Mapper方法名 */
+    /**
+     * Mapper方法名
+     */
     private String methodName;
 
-    /** 字段映射列表 */
+    /**
+     * 字段映射列表
+     */
     private List<FieldMapping> fieldMappings;
 
-    /** 验证时查询的数据条数（默认10） */
+    /**
+     * 验证时查询的数据条数（默认10）
+     */
     private Integer validateLimit;
 
     public MigrationRequest() {
-        this.validateLimit = 10;
+        this.validateLimit = VALIDATE_LIMIT;
     }
 
     public String getTableName() {

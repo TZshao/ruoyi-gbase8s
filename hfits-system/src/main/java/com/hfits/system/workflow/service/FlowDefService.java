@@ -1,8 +1,8 @@
 package com.hfits.system.workflow.service;
 
+import com.hfits.common.utils.DateUtils;
 import com.hfits.system.workflow.domain.FlowDef;
 import com.hfits.system.workflow.domain.FlowStepDef;
-import com.hfits.common.utils.DateUtils;
 import com.hfits.system.workflow.mapper.FlowDefMapper;
 import com.hfits.system.workflow.mapper.FlowStepDefMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,21 +18,22 @@ import java.util.List;
  */
 @Service
 public class FlowDefService {
+    public static final Integer START_STEP = 1;
+    public static final String START_STEP_CODE = "RISE";
+    public static final String START_STEP_NAME = "发起申请";
+
+    public static final Integer APPROVE_STEP = 2;
+    public static final String APPROVE_STEP_CODE = "APPROVE";
+    public static final String APPROVE_STEP_NAME = "申请审批 1";
+
+    public static final Integer CLOSE_STEP = 99;
+    public static final String CLOSE_STEP_CODE = "CLOSED";
+    public static final String CLOSE_STEP_NAME = "流程关闭";
+
     @Autowired
     private FlowDefMapper flowDefMapper;
-
     @Autowired
     private FlowStepDefMapper flowStepDefMapper;
-
-    public final static String START_STEP_CODE = "RISE";
-    public final static String START_STEP_NAME = "发起申请";
-
-    public final static String APPROVE_STEP_CODE = "APPROVE";
-    public final static String APPROVE_STEP_NAME = "申请审批 1";
-
-    public final static String CLOSE_STEP_CODE = "CLOSED";
-    public final static String CLOSE_STEP_NAME = "流程关闭";
-
 
     public FlowDef selectFlowDefById(Long id) {
         return flowDefMapper.selectFlowDefById(id);
@@ -45,7 +46,8 @@ public class FlowDefService {
 
     /**
      * 根据flowCode查询流程定义列表（全部版本/最新版本）
-     * @param flowCode 流程编号
+     *
+     * @param flowCode        流程编号
      * @param latestPublished 是否查询最新发布版本
      * @return 流程定义列表
      */
@@ -76,7 +78,7 @@ public class FlowDefService {
         startStep.setStepCode(START_STEP_CODE);
         startStep.setStepName(START_STEP_NAME);
         startStep.setNextOnPass(APPROVE_STEP_CODE);
-        startStep.setOrderNum(1);
+        startStep.setOrderNum(START_STEP);
         startStep.setCreateBy(flowDef.getCreateBy());
         startStep.setCreateTime(DateUtils.getNowDate());
         flowStepDefMapper.insertFlowStepDef(startStep);
@@ -87,7 +89,7 @@ public class FlowDefService {
         approveStep.setStepName(APPROVE_STEP_NAME);
         approveStep.setNextOnPass(CLOSE_STEP_CODE);
         approveStep.setNextOnReject(CLOSE_STEP_CODE);
-        approveStep.setOrderNum(2);
+        approveStep.setOrderNum(APPROVE_STEP);
         approveStep.setCreateBy(flowDef.getCreateBy());
         approveStep.setCreateTime(DateUtils.getNowDate());
         flowStepDefMapper.insertFlowStepDef(approveStep);
@@ -96,7 +98,7 @@ public class FlowDefService {
         closeStep.setFlowId(flowDef.getId());
         closeStep.setStepCode(CLOSE_STEP_CODE);
         closeStep.setStepName(CLOSE_STEP_NAME);
-        closeStep.setOrderNum(99);
+        closeStep.setOrderNum(CLOSE_STEP);
         closeStep.setCreateBy(flowDef.getCreateBy());
         closeStep.setCreateTime(DateUtils.getNowDate());
         flowStepDefMapper.insertFlowStepDef(closeStep);
@@ -133,6 +135,7 @@ public class FlowDefService {
 
     /**
      * 发布流程
+     *
      * @param id 流程定义ID
      * @return 结果
      */
@@ -152,7 +155,8 @@ public class FlowDefService {
 
     /**
      * 版本迭代：复制FlowDef及其step，flowCode不变version+1，step除了flowId改变其余不变
-     * @param id 当前流程定义ID
+     *
+     * @param id       当前流程定义ID
      * @param createBy 创建人
      * @return 新版本流程定义ID
      */

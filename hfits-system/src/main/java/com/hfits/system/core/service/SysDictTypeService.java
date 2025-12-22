@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.hfits.system.core.service.SysDictDataService.PREFIX;
+import static com.hfits.system.core.service.SysDictDataService.*;
 
 /**
  * 字典 业务层处理
@@ -27,7 +27,7 @@ import static com.hfits.system.core.service.SysDictDataService.PREFIX;
  * @author hfits
  */
 @Service
-public class SysDictTypeService{
+public class SysDictTypeService {
     @Autowired
     private SysDictTypeMapper dictTypeMapper;
 
@@ -77,7 +77,8 @@ public class SysDictTypeService{
         }
         if (StringUtils.isNotEmpty(dictType) && dictType.startsWith(PREFIX)) {
             String[] tableKeyLabel = dictType.substring(dictType.indexOf(PREFIX) + PREFIX.length()).split(",");
-            dictDatas = dictDataMapper.selectKeyLableFromTable(tableKeyLabel[0], tableKeyLabel[1], tableKeyLabel[2]);
+            dictDatas = dictDataMapper.selectKeyLableFromTable(
+                    tableKeyLabel[TABLE_INDEX], tableKeyLabel[VALUE_INDEX], tableKeyLabel[LABEL_INDEX]);
         } else {
             dictDatas = dictDataMapper.selectDictDataByType(dictType);
         }
@@ -134,9 +135,11 @@ public class SysDictTypeService{
     public void loadingDictCache() {
         SysDictData dictData = new SysDictData();
         dictData.setStatus("0");
-        Map<String, List<SysDictData>> dictDataMap = dictDataMapper.selectDictDataList(dictData).stream().collect(Collectors.groupingBy(SysDictData::getDictType));
+        Map<String, List<SysDictData>> dictDataMap =
+                dictDataMapper.selectDictDataList(dictData).stream().collect(Collectors.groupingBy(SysDictData::getDictType));
         for (Map.Entry<String, List<SysDictData>> entry : dictDataMap.entrySet()) {
-            DictUtils.setDictCache(entry.getKey(), entry.getValue().stream().sorted(Comparator.comparing(SysDictData::getDictSort)).collect(Collectors.toList()));
+            DictUtils.setDictCache(entry.getKey(), entry.getValue()
+                    .stream().sorted(Comparator.comparing(SysDictData::getDictSort)).collect(Collectors.toList()));
         }
     }
 
@@ -165,7 +168,7 @@ public class SysDictTypeService{
      */
 
     public int insertDictType(SysDictType dict) {
-        if(dict.getDictType().startsWith(PREFIX)){
+        if (dict.getDictType().startsWith(PREFIX)) {
             SqlUtil.filterKeyword(dict.getDictType());
         }
         int row = dictTypeMapper.insertDictType(dict);

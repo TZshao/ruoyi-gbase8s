@@ -5,8 +5,7 @@ package com.hfits.common.enums;
  *
  * @author hfits
  */
-public enum BusinessType
-{
+public enum BusinessType {
     /**
      * 其它
      */

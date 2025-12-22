@@ -1,15 +1,15 @@
 package com.hfits.generator.service;
 
-import java.util.List;
 import com.hfits.generator.domain.GenTableColumn;
+
+import java.util.List;
 
 /**
  * 业务字段 服务层
  *
  * @author hfits
  */
-public interface IGenTableColumnService
-{
+public interface IGenTableColumnService {
     /**
      * 查询业务字段列表
      *

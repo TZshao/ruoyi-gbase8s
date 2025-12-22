@@ -27,7 +27,7 @@ public interface SqlserverMapper {
      * 查询源表部分数据用于验证
      *
      * @param tableName 表名
-     * @param limit 限制条数
+     * @param limit     限制条数
      * @return 数据列表
      */
     List<Map<String, Object>> selectTableDataLimit(@Param("tableName") String tableName, @Param("limit") Integer limit);

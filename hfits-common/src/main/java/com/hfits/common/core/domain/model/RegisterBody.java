@@ -5,7 +5,6 @@ package com.hfits.common.core.domain.model;
  *
  * @author hfits
  */
-public class RegisterBody extends LoginBody
-{
+public class RegisterBody extends LoginBody {
 
 }

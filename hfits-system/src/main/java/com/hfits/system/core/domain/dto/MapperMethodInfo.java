@@ -10,22 +10,31 @@ import java.io.Serializable;
 public class MapperMethodInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    /** 方法名 */
+    /**
+     * 方法名
+     */
     private String methodName;
 
-    /** Mapper接口全限定名 */
+    /**
+     * Mapper接口全限定名
+     */
     private String mapperClassName;
 
-    /** 参数类型（实体类全限定名） */
+    /**
+     * 参数类型（实体类全限定名）
+     */
     private String parameterType;
 
-    /** 参数类型简单名 */
+    /**
+     * 参数类型简单名
+     */
     private String parameterTypeSimpleName;
 
     public MapperMethodInfo() {
     }
 
-    public MapperMethodInfo(String methodName, String mapperClassName, String parameterType, String parameterTypeSimpleName) {
+    public MapperMethodInfo(String methodName, String mapperClassName,
+                            String parameterType, String parameterTypeSimpleName) {
         this.methodName = methodName;
         this.mapperClassName = mapperClassName;
         this.parameterType = parameterType;

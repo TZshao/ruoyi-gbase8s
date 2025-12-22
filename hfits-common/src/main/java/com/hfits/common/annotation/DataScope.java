@@ -2,11 +2,7 @@ package com.hfits.common.annotation;
 
 import com.hfits.common.enums.FieldGroup;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * 数据权限过滤注解
@@ -21,7 +17,7 @@ public @interface DataScope {
     /**
      * 表的别名
      */
-    public String tableAlias() default "";
+    String tableAlias() default "";
 
 
 //    同一个接口，拥有部门级权限的人，是通过 DeptCode之类的过滤，
@@ -30,8 +26,8 @@ public @interface DataScope {
     /**
      * 部门权限字段组
      */
-    public FieldGroup deptFieldGroup();
+    FieldGroup deptFieldGroup();
 
     //个人权限字段组
-    public FieldGroup selfFieldGroup();
+    FieldGroup selfFieldGroup();
 }

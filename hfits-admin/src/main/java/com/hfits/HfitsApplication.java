@@ -1,5 +1,7 @@
 package com.hfits;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -10,15 +12,14 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
  * @author hfits
  */
 @SpringBootApplication(
-        exclude = { DataSourceAutoConfiguration.class },
-        scanBasePackages = {"com.hfits" })
+        exclude = {DataSourceAutoConfiguration.class},
+        scanBasePackages = {"com.hfits"})
 public class HfitsApplication {
-    public static void main(String[] args)
-    {
+    public static final Logger logger = LoggerFactory.getLogger(HfitsApplication.class);
+
+    public static void main(String[] args) {
         System.setProperty("spring.devtools.restart.enabled", "false");
         SpringApplication.run(HfitsApplication.class, args);
-        for (int i = 0; i < 3; i++) {
-            System.out.println("============================应用启动成功============================");
-        }
+        logger.info("============================应用启动成功============================");
     }
 }

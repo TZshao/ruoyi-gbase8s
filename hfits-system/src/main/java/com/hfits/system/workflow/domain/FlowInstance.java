@@ -1,15 +1,14 @@
 package com.hfits.system.workflow.domain;
 
+import com.hfits.common.core.domain.BaseEntity;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import com.hfits.common.core.domain.BaseEntity;
 
 /**
  * 流程实例
  */
-public class FlowInstance extends BaseEntity
-{
+public class FlowInstance extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     private Long id;
@@ -24,18 +23,28 @@ public class FlowInstance extends BaseEntity
 
     private Integer flowVersion;
 
-    /** 申请人用户ID */
+    /**
+     * 申请人用户ID
+     */
     private Long applicantId;
 
-    /** 状态 PENDING/RUNNING/CLOSED */
+    /**
+     * 状态 PENDING/RUNNING/CLOSED
+     */
     private String status;
 
-    /** 当前步骤编码 */
+    /**
+     * 当前步骤编码
+     */
     private String currentStepCode;
-    /** 当前步骤对应的审批人的值 （split数组：roleid/userid/deptCode）*/
+    /**
+     * 当前步骤对应的审批人的值 （split数组：roleid/userid/deptCode）
+     */
     private String currentStepHandler;
 
-    /** 业务表单数据(JSON) */
+    /**
+     * 业务表单数据(JSON)
+     */
     private String formData;
 
     // 关联展示字段
@@ -74,89 +83,72 @@ public class FlowInstance extends BaseEntity
         this.flowVersion = flowVersion;
     }
 
-    public Long getId()
-    {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Long id)
-    {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getFlowId()
-    {
+    public Long getFlowId() {
         return flowId;
     }
 
-    public void setFlowId(Long flowId)
-    {
+    public void setFlowId(Long flowId) {
         this.flowId = flowId;
     }
 
-    public Long getApplicantId()
-    {
+    public Long getApplicantId() {
         return applicantId;
     }
 
-    public void setApplicantId(Long applicantId)
-    {
+    public void setApplicantId(Long applicantId) {
         this.applicantId = applicantId;
     }
 
-    public String getStatus()
-    {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(String status)
-    {
+    public void setStatus(String status) {
         this.status = status;
     }
 
-    public String getCurrentStepCode()
-    {
+    public String getCurrentStepCode() {
         return currentStepCode;
     }
 
-    public void setCurrentStepCode(String currentStepCode)
-    {
+    public void setCurrentStepCode(String currentStepCode) {
         this.currentStepCode = currentStepCode;
     }
 
-    public String getFormData()
-    {
+    public String getFormData() {
         return formData;
     }
 
-    public void setFormData(String formData)
-    {
+    public void setFormData(String formData) {
         this.formData = formData;
     }
 
-    public String getFlowCode()
-    {
+    public String getFlowCode() {
         return flowCode;
     }
 
-    public void setFlowCode(String flowCode)
-    {
+    public void setFlowCode(String flowCode) {
         this.flowCode = flowCode;
     }
 
-    public String getFlowName()
-    {
+    public String getFlowName() {
         return flowName;
     }
 
-    public void setFlowName(String flowName)
-    {
+    public void setFlowName(String flowName) {
         this.flowName = flowName;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
                 .append("id", getId())
                 .append("flowId", getFlowId())

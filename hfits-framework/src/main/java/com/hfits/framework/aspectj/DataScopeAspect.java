@@ -1,6 +1,12 @@
 package com.hfits.framework.aspectj;
 
+import com.hfits.common.annotation.DataScope;
+import com.hfits.common.core.domain.BaseEntity;
+import com.hfits.common.core.domain.entity.SysUser;
+import com.hfits.common.core.domain.model.LoginUser;
 import com.hfits.common.enums.FieldGroup;
+import com.hfits.common.utils.SecurityUtils;
+import com.hfits.common.utils.StringUtils;
 import com.hfits.common.utils.auth.AuthUtil;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -8,12 +14,6 @@ import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import com.hfits.common.annotation.DataScope;
-import com.hfits.common.core.domain.BaseEntity;
-import com.hfits.common.core.domain.entity.SysUser;
-import com.hfits.common.core.domain.model.LoginUser;
-import com.hfits.common.utils.SecurityUtils;
-import com.hfits.common.utils.StringUtils;
 
 /**
  * 数据过滤处理
@@ -57,9 +57,9 @@ public class DataScopeAspect {
                     String tableAlias = controllerDataScope.tableAlias();
 
                     //个人权限，部门权限用的字段组不一样
-                    FieldGroup fieldGroup = AuthUtil.DATA_SCOPE_SELF.equals(currentUser.getDataScope()) ?
-                            controllerDataScope.selfFieldGroup() :
-                            controllerDataScope.deptFieldGroup();
+                    FieldGroup fieldGroup = AuthUtil.DATA_SCOPE_SELF.equals(currentUser.getDataScope())
+                            ? controllerDataScope.selfFieldGroup()
+                            : controllerDataScope.deptFieldGroup();
 
                     // 使用 AuthUtil 应用数据权限
                     AuthUtil.apply(baseEntity, currentUser, tableAlias, fieldGroup);

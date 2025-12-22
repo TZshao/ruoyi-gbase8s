@@ -1,10 +1,13 @@
 package com.hfits.system.workflow.service;
 
-import static com.hfits.system.workflow.service.FlowDefService.CLOSE_STEP_CODE;
-
-import java.lang.reflect.Method;
-import java.util.List;
-
+import com.hfits.common.exception.ServiceException;
+import com.hfits.common.utils.DateUtils;
+import com.hfits.common.utils.StringUtils;
+import com.hfits.system.workflow.domain.*;
+import com.hfits.system.workflow.mapper.FlowActionMapper;
+import com.hfits.system.workflow.mapper.FlowDefMapper;
+import com.hfits.system.workflow.mapper.FlowInstanceMapper;
+import com.hfits.system.workflow.mapper.FlowStepDefMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,18 +15,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hfits.system.workflow.domain.FlowAction;
-import com.hfits.system.workflow.domain.FlowDef;
-import com.hfits.system.workflow.domain.FlowInstance;
-import com.hfits.system.workflow.domain.FlowStatus;
-import com.hfits.system.workflow.domain.FlowStepDef;
-import com.hfits.common.exception.ServiceException;
-import com.hfits.common.utils.DateUtils;
-import com.hfits.common.utils.StringUtils;
-import com.hfits.system.workflow.mapper.FlowActionMapper;
-import com.hfits.system.workflow.mapper.FlowDefMapper;
-import com.hfits.system.workflow.mapper.FlowInstanceMapper;
-import com.hfits.system.workflow.mapper.FlowStepDefMapper;
+import java.lang.reflect.Method;
+import java.util.List;
+
+import static com.hfits.system.workflow.service.FlowDefService.CLOSE_STEP_CODE;
 
 /**
  * 流程实例Service业务层处理
@@ -175,12 +170,13 @@ public class FlowInstanceService {
     /**
      * 调用 tiggerInterface 的事件
      */
+    private static final Integer METHOD_LENGTH = 2;
     private void invokeEvent(String eventKey, FlowInstance instance) {
         if (StringUtils.isBlank(eventKey)) {
             return;
         }
         String[] parts = eventKey.split("\\.");
-        if (parts.length != 2) {
+        if (parts.length != METHOD_LENGTH) {
             throw new RuntimeException("引用名错误");
         }
         String beanName = parts[0];

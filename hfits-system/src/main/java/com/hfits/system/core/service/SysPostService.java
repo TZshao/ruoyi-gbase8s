@@ -17,7 +17,7 @@ import java.util.List;
  * @author hfits
  */
 @Service
-public class SysPostService{
+public class SysPostService {
     @Autowired
     private SysPostMapper postMapper;
 
@@ -31,8 +31,7 @@ public class SysPostService{
      * @return 岗位信息集合
      */
 
-    public List<SysPost> selectPostList(SysPost post)
-    {
+    public List<SysPost> selectPostList(SysPost post) {
         return postMapper.selectPostList(post);
     }
 
@@ -42,8 +41,7 @@ public class SysPostService{
      * @return 岗位列表
      */
 
-    public List<SysPost> selectPostAll()
-    {
+    public List<SysPost> selectPostAll() {
         return postMapper.selectPostAll();
     }
 
@@ -54,8 +52,7 @@ public class SysPostService{
      * @return 角色对象信息
      */
 
-    public SysPost selectPostById(Long postId)
-    {
+    public SysPost selectPostById(Long postId) {
         return postMapper.selectPostById(postId);
     }
 
@@ -66,8 +63,7 @@ public class SysPostService{
      * @return 选中岗位ID列表
      */
 
-    public List<Long> selectPostListByUserId(Long userId)
-    {
+    public List<Long> selectPostListByUserId(Long userId) {
         return postMapper.selectPostListByUserId(userId);
     }
 
@@ -78,12 +74,10 @@ public class SysPostService{
      * @return 结果
      */
 
-    public boolean checkPostNameUnique(SysPost post)
-    {
+    public boolean checkPostNameUnique(SysPost post) {
         Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();
         SysPost info = postMapper.checkPostNameUnique(post.getPostName());
-        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())
-        {
+        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue()) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
@@ -96,12 +90,10 @@ public class SysPostService{
      * @return 结果
      */
 
-    public boolean checkPostCodeUnique(SysPost post)
-    {
+    public boolean checkPostCodeUnique(SysPost post) {
         Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();
         SysPost info = postMapper.checkPostCodeUnique(post.getPostCode());
-        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue())
-        {
+        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue()) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
@@ -114,8 +106,7 @@ public class SysPostService{
      * @return 结果
      */
 
-    public int countUserPostById(Long postId)
-    {
+    public int countUserPostById(Long postId) {
         return userPostMapper.countUserPostById(postId);
     }
 
@@ -126,8 +117,7 @@ public class SysPostService{
      * @return 结果
      */
 
-    public int deletePostById(Long postId)
-    {
+    public int deletePostById(Long postId) {
         return postMapper.deletePostById(postId);
     }
 
@@ -138,13 +128,10 @@ public class SysPostService{
      * @return 结果
      */
 
-    public int deletePostByIds(Long[] postIds)
-    {
-        for (Long postId : postIds)
-        {
+    public int deletePostByIds(Long[] postIds) {
+        for (Long postId : postIds) {
             SysPost post = selectPostById(postId);
-            if (countUserPostById(postId) > 0)
-            {
+            if (countUserPostById(postId) > 0) {
                 throw new ServiceException(String.format("%1$s已分配,不能删除", post.getPostName()));
             }
         }
@@ -158,8 +145,7 @@ public class SysPostService{
      * @return 结果
      */
 
-    public int insertPost(SysPost post)
-    {
+    public int insertPost(SysPost post) {
         return postMapper.insertPost(post);
     }
 
@@ -170,8 +156,7 @@ public class SysPostService{
      * @return 结果
      */
 
-    public int updatePost(SysPost post)
-    {
+    public int updatePost(SysPost post) {
         return postMapper.updatePost(post);
     }
 }
